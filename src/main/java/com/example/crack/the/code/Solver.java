@@ -5,6 +5,9 @@
 
 package com.example.crack.the.code;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -45,6 +48,8 @@ public class Solver {
     // store the indexes that are solved
     private boolean[] solvedIndexes;
 
+    private int numSolvedIndexes = 0;
+
     // the possible combinations
     private ArrayList<Integer[]> possibleCombinations;
 
@@ -64,7 +69,14 @@ public class Solver {
      private ArrayList<Integer> inCodeIndexUnknown = new ArrayList<>();
         
      //boolean for debug output
-        private static final boolean debug = true;
+        private static final boolean debug = false;
+
+    // this will store the for sure invalid combinations
+    private ArrayList<Integer[]> invalidCombinations = new ArrayList<>();
+
+    // the number of common numbers in the one clue combinations 
+    private int numCommonNumbers = 0;
+    
 
     
 
@@ -100,8 +112,10 @@ public class Solver {
         
     }
 
-    public Integer[] solve(){
+    public Integer[] solve() throws IOException{
 
+
+        boolean debug = true;
         if(debug){
             System.out.println("the clues before removing nothing is correct: ");
              for (Clue clue : clues) {
@@ -145,13 +159,25 @@ public class Solver {
         //banWronglyPlacedAtIndex();
 
         
-
+        if(debug){
+            generatePossibleCombinations();
+            System.out.println("the size of the possible combinations: " + possibleCombinations.size());
+        }
 
 
         // check if there is the code is solved and/or if any clue is solved
         // check if we solved the code
         if (isSolved()) {
             return code;
+        }
+
+        if(debug){
+            System.out.println("clm unknown: ");
+             for (Clue clue : clues) {
+                System.out.println(clue.toString());
+            }
+            // 
+            System.out.println("done.\n");
         }
 
         updateBannedListFromUnknown();
@@ -166,36 +192,83 @@ public class Solver {
         }
         
 
-        if(debug){
-
-        generatePossibleCombinations();
-
-        // print the size of the possible combinations
-        System.out.println("the size of the possible combinations: " + possibleCombinations.size());
+       // numSolvedIndexes
+       for(boolean indexSolved:solvedIndexes){
+           if(indexSolved){
+               numSolvedIndexes++;
+           }
         }
-        // remove all conflicting cases
-        // if there is a conflicting case then the number is not gonna be in the code
-        // conflicting case is when there are 2 clues with the a number that is the same for both indexes and in one clue the number is correct and well placed and in the other clue the number is correct but wrongly placed
+
+        if(numSolvedIndexes == 0){
+            useMostCorrectNumberClue();
+            updateBannedListFromUnknown();
+
+
+        } else{
+            // print the number of solved indexes
+            System.out.println("the number of solved indexes: " + numSolvedIndexes);
+        }
+
+            useMostCorrectNumberClue();
+            updateBannedListFromUnknown();
+
+
+
+
         removeConflictingCases();
-                if(debug){
 
-                generatePossibleCombinations();
-        // print the size of the possible combinations
-        System.out.println("the size of the possible combinations: " + possibleCombinations.size());
-
-                        }
+        
         
                         // print the unknown numbers
         System.out.println("the numbers that are in the code but we dont know the index: " + inCodeIndexUnknown.toString());
 
 
-        // print the clues
-        /*
-        System.out.println("the clues: ");
-        for (Clue clue : clues) {
-            System.out.println(clue.toString());
+        
+    
+         if (isSolved()) {
+            return code;
         }
-//      */
+
+        
+
+
+        // check if the number at inCodeIndexUnknown can be added to the index's banned list
+        for (Integer number : inCodeIndexUnknown) {
+            // loop trougth the clues and check if the number is in the clue
+            for (Clue clue : clues) {
+                if (clue.getCombination().contains(number)) {
+                    // check if the all the numbers that are correct not well placed and if so then add the number to the banned list of the index
+                    if (clue.getCorrectDigits() == clue.getIncorrectlyPlacedDigits()) {
+                        if (!bannedListPerIndex.get(clue.getCombination().indexOf(number)).contains(number)) {
+                            bannedListPerIndex.get(clue.getCombination().indexOf(number)).add(number);
+                        }
+                    }
+                }
+            }
+        }
+
+        // update the numer of correct digits and incorrectly placed digits
+        for (Clue clue : clues) {
+            for(int i = 0; i < clue.getCombination().size(); i++){
+                if(clue.getCombination().get(i) != null){
+                    if(bannedListPerIndex.get(i).contains(clue.getCombination().get(i))){
+                        clue.setCorrectDigits(clue.getCorrectDigits() - 1);
+                        clue.setIncorrectlyPlacedDigits(clue.getIncorrectlyPlacedDigits() - 1);
+                    }
+                }
+            }
+        } 
+    
+        removeBannedNumbers();
+
+        
+
+
+        
+
+        if (isSolved()) {
+            return code;
+        }
         
         // print the banned list
         System.out.println("the banned list: " + bannedList.toString());
@@ -206,11 +279,79 @@ public class Solver {
             System.out.println("index " + i + ": " + bannedListPerIndex.get(i).toString());
         }
 
+                    System.out.println("the numbers that are in the code but we dont know the index: " + inCodeIndexUnknown.toString());
+
+
+        // remove the banned numbers
+        removeBannedNumbers();
+
+        // print the clues
+        System.out.println("the clues after removing banned numbers: ");
+        for (Clue clue : clues) {
+            System.out.println(clue.toString());
+        }
+        
+
         // generate all the possible combinations that can be generated from the clues. (all the numbers in the clues are the possible numbers that can be in the code)
         generatePossibleCombinations();
 
         // print the size of the possible combinations
         System.out.println("the size of the possible combinations: " + possibleCombinations.size());
+
+        File removedCombinationsFile = new File("removedCombinations.txt");
+        if(removedCombinationsFile.exists()){
+            removedCombinationsFile.delete();
+        }
+        removedCombinationsFile.createNewFile();
+       
+
+        // filewriter for the removed combinations file
+        FileWriter removedCombinationsFileWriter = new FileWriter(removedCombinationsFile);
+
+
+        
+        
+        for(Clue clue:clues){
+            // loop trougth the possible combinations and check if the combination satisfies the clue
+            for (int i = possibleCombinations.size() - 1; i >= 0; i--) {
+                if (!checkIfComboValid(possibleCombinations.get(i), clue)) {
+                
+                    // check if its 3 9 1 7
+                    if(Arrays.equals(possibleCombinations.get(i), new Integer[]{3, 9, 1, 7})){
+                        System.out.println("the combination 3 9 1 7 does not satisfy the clue " + clue.toString());
+                    }
+                    
+                    removedCombinationsFileWriter.write(Arrays.toString(possibleCombinations.get(i)) + "\n");
+                    possibleCombinations.remove(i);
+
+
+
+                    // add to file
+                }
+
+                if (possibleCombinations.size() == 1) {
+                    break;
+                }
+            }
+
+            if (possibleCombinations.size() == 1) {
+                break;
+            }
+        }
+
+        removedCombinationsFileWriter.close();
+
+        if(isSolved()){
+            return code;
+        }
+
+        // print the banned list per index
+        System.out.println("the banned list per index: ");
+        for (int i = 0; i < bannedListPerIndex.size(); i++) {
+            System.out.println("index " + i + ": " + bannedListPerIndex.get(i).toString());
+        }
+
+
         
         return code;
 
@@ -225,7 +366,6 @@ public class Solver {
         // so we can eliminate the 4 from the clue and add it to the banned list of the index
 
         
-        // loop trougth the clues
         for (Clue clue : clues) {
             // count how many numbers in the clue are in the inCodeIndexUnknown list
             int numInCodeIndexUnknown = 0;
@@ -239,12 +379,6 @@ public class Solver {
             if (numInCodeIndexUnknown == clue.getCorrectDigits()) {
                 // loop trougth the numbers in the clue
                 for (int i = 0; i < clue.getCombination().size(); i++) {
-                  /*  // if the number is not in the inCodeIndexUnknown list then add it to the banned list of the index
-                    if (!inCodeIndexUnknown.contains(clue.getCombination().get(i)) && clue.getCombination().get(i) != null) {
-                        if (!bannedListPerIndex.get(i).contains(clue.getCombination().get(i))) {
-                            bannedListPerIndex.get(i).add(clue.getCombination().get(i));
-                        }
-                    } */
 
                     // if the number is in the inCodeIndexUnknown list then remove it from the banned list (for all indexes)
                     if (!inCodeIndexUnknown.contains(clue.getCombination().get(i)) && clue.getCombination().get(i) != null) {
@@ -262,45 +396,10 @@ public class Solver {
 
     }
 
-    private void banWronglyPlacedAtIndex() {
-
-        
-
-
-        for(Clue clue:clues){
-            if(clue.getIncorrectlyPlacedDigits() == clue.getCorrectDigits()){
-                if(clue.getCorrectDigits() <= 0){
-                    // throw an error
-                    throw new Error("the clue " + clue.getHintMessage() + " has 0 correct digits");
-                }
-                if(clue.getWellPlacedDigits() > 0){
-                    // throw an error
-                    throw new Error("the clue " + clue.getHintMessage() + " has well placed digits");
-                }
-
-                // add all the numbers in the clue to the banned list of the index
-                for (int i = 0; i < clue.getCombination().size(); i++) {
-                    if (clue.getCombination().get(i) != null) {
-                        // if the number is not in the banned list then add it to the banned list
-                        if (!bannedListPerIndex.get(i).contains(clue.getCombination().get(i))) {
-                            bannedListPerIndex.get(i).add(clue.getCombination().get(i));
-                        }
-                        
-                    }
-                }
-
-            }
-        }
-
-        // remove the banned numbers
-        removeBannedNumbers();
-
-       
-      
-        
-        
     
-    }
+        
+
+      
 
     private void removeConflictingCases() {
         // check if there is any conflicting cases
@@ -461,10 +560,10 @@ public class Solver {
                             }*/
                             
                             // if debug is true and the inCodeIndexUnknown already contains the number then print a debug message
-                            if (debug && inCodeIndexUnknown.contains(clue.getCombination().get(i))) {
+                        /*     if (debug && inCodeIndexUnknown.contains(clue.getCombination().get(i))) {
                                 System.out.println("the number " + clue.getCombination().get(i) + " is already in the inCodeIndexUnknown list");
                             }
-                            
+                            */
 
                             inCodeIndexUnknown.add(clue.getCombination().get(i));
 
@@ -577,10 +676,19 @@ public class Solver {
             }
         }
 
+
+
         
     }
 
     private boolean isSolved() {
+
+        // if the possible combinations is 1 then the code is solved
+        if ( possibleCombinations != null && possibleCombinations.size() == 1) {
+            code = possibleCombinations.get(0);
+            return true;
+        }
+
         removeBannedNumbers();
         // check for any solved clues
         checkIfClueSolved();
@@ -620,27 +728,69 @@ public class Solver {
      */
     private void generatePossibleCombinations() {
         // initialize the possible combinations
-       possibleCombinations = new ArrayList<>();
+        if(possibleCombinations != null){
+                System.out.println("before generating possible combinations - size of possibleCombinations list: " + possibleCombinations.size());
+
+                possibleCombinations = new ArrayList<>();
+       // print the size of the possible combinations
+        System.out.println("the size of the possible combinations: " + possibleCombinations.size());
+
+
+
+        } else{
+            possibleCombinations = new ArrayList<>();
+        }
+       
 
         generateCombinations(possibleCombinations, new Integer[code.length], 0);
 
-        System.out.println();
-        System.out.println("size of possible combinations before removing banned numbers: " + possibleCombinations.size());
+        
+        // print called generateCombinations
 
 
-        // remove combinations that doesnt contains ALL the numbers that are in the inCodeIndexUnknown list
+
+        System.out.println("called generateCombinations" + " - size of possibleCombinations list: " + possibleCombinations.size());
+
+
+        // debug - prinnt the size of the possible combinations
+        if(debug){
+            System.out.println("the size of the possible combinations (before removeing duplicates): " + possibleCombinations.size());
+        }
+        // remove the same combinations
+        for (int i = possibleCombinations.size() - 1; i >= 0; i--) {
+            for (int j = i - 1; j >= 0; j--) {
+                if (Arrays.equals(possibleCombinations.get(i), possibleCombinations.get(j))) {
+                    possibleCombinations.remove(i);
+                    break;
+                }
+            }
+        }
+
+
+        if(debug){
+                System.out.println("the size of the possible combinations (after removeing duplicates): " + possibleCombinations.size());
+        }
+
 
         
+
+        // remove combinations that doesnt contains ALL the numbers that are in the inCodeIndexUnknown list
         for (int i = possibleCombinations.size() - 1; i >= 0; i--) {
             Integer[] combination = possibleCombinations.get(i);
             for (Integer digit : inCodeIndexUnknown) {
                 if (!Arrays.asList(combination).contains(digit)) {
+                    if(debug){
+                        System.out.println("removing combination: " + Arrays.toString(combination) + " because it does not contain the number " + digit);
+                    }
                     possibleCombinations.remove(i);
                     break;
                 }
             }
         }
         
+
+        // print the size of the possible combinations
+        System.out.println("the size of the possible combinations (after removeing combinations that doesnt contains ALL the numbers that are in the inCodeIndexUnknown list): " + possibleCombinations.size());
 
         
 
@@ -650,7 +800,14 @@ public class Solver {
 
     private void generateCombinations(ArrayList<Integer[]> combinations, Integer[] currentCombination, int index) {
         if(index == code.length){
-            combinations.add(currentCombination);
+
+          //  System.out.println("adding combination: " + Arrays.toString(currentCombination));
+
+            // Create a copy of the array before adding it to the list
+            Integer[] copyCombination = Arrays.copyOf(currentCombination, currentCombination.length);
+    
+            combinations.add(copyCombination);
+            possibleCombinations.add(copyCombination);
             return;
         }
 
@@ -661,10 +818,16 @@ public class Solver {
         } 
 
         for (int digit = 0; digit < 10; digit++) {
-            if (!bannedList.contains(digit) && !bannedListPerIndex.get(index).contains(digit)) {
-
+            if (!bannedListPerIndex.get(index).contains(digit)) {
+               // System.out.println("index " + index + " digit " + digit + " is not in the banned list of index " + index + " so we will add it to the current combination: ");
                 currentCombination[index] = digit;
                 generateCombinations(combinations, currentCombination, index + 1);
+            } else{
+                if(debug){
+                    System.out.println("the number " + digit + " is in the banned list of index " + index);
+                    // print the banned list of index
+                    System.out.println("the banned list of index " + index + ": " + bannedListPerIndex.get(index).toString());
+                }
             }
         }
 
@@ -688,123 +851,449 @@ public class Solver {
         List<Clue> mostUseClueAsList = new ArrayList<>();
         mostUseClueAsList.add(clues.get(clueIndex));
 
+        // generate all possibale combinations that have a length = to the number of correct digits in the clue
+        possibleCombinations = new ArrayList<>();
 
-        // generate all the possible combinations that can be generated from that clue (alone) with the help of the banned list and the banned list per index
-         possibleCombinations = new ArrayList<>();
-        
-        
-         HashSet<Integer> allNumbers = getAllNumbersInClues(mostUseClueAsList);
+
+        // the combinations will just be some of the numbers in the clue (it will be X numbers where X is the number of correct digits in the clue)
+        // the order of the numbers in the combination does not matter
+        // it will not include all the numbers in the clue
+        //  example if the clue is 1 2 3 and the number of correct digits is 2 then the possible combinations will be 1 2, 1 3, 2 3. 
+        for (int i = 0; i < mostUseClueAsList.size(); i++) {
+
+        Clue currentClue = mostUseClueAsList.get(i);
+        List<Integer> combination = currentClue.getCombination();
+        int numCorrectDigits = currentClue.getCorrectDigits(); // the number of correct digits in the clue
+            
+
+        generateCombinationsOneClue(possibleCombinations, combination, numCorrectDigits);
+
+
+        }
+
+
+
+
+         // print the size of the possible combinations (one clue)
+        System.out.println("the size of the possible combinations (one clue): " + possibleCombinations.size());
         
 
-        System.out.println("all numbers: " + allNumbers.toString());
-        
-        // the max number of all numbers
-        int maxNumber = allNumbers.stream().max(Integer::compare).get();
+        // now chcek which combination satisfies the number of correct digits of the clues (for now we will not check if the numbers are well placed or not)
+        for (int j = possibleCombinations.size() - 1; j >= 0; j--) {
+            if (!checkIfCombinationSatisfiesClues(possibleCombinations.get(j),false)) {
+                possibleCombinations.remove(j);
+            }
+        }
 
-        for (int i = 0; i < maxNumber; i++) {
-            if (!allNumbers.contains(i)) {
-                bannedList.add(i);
-                if(debug){
-                    System.out.println("the number " + i + " is not in any clue");
-                }
-                
+        // if all combinations do not satisfy the clues then regenerate the combinations but this time we will check if the combinations satisfy the clues partially
+        if (possibleCombinations.size() == 0) {
+
+            System.out.println("all combinations do not satisfy the clues so we will check if the combinations satisfy the clues partially");
+
+            // generate all possibale combinations that have a length = to the number of correct digits in the clue
+            possibleCombinations = new ArrayList<>();
+            for (int i = 0; i < mostUseClueAsList.size(); i++) {
+
+                Clue currentClue = mostUseClueAsList.get(i);
+                List<Integer> combination = currentClue.getCombination();
+                int numCorrectDigits = currentClue.getCorrectDigits(); // the number of correct digits in the clue
+            
+
+                 generateCombinationsOneClue(possibleCombinations, combination, numCorrectDigits);
+             }
+
+        // print the size of the possible combinations (one clue)
+        System.out.println("the size of the possible combinations (one clue): " + possibleCombinations.size());
+
+        // print with partial
+        System.out.print("with partial: ");
+        // now chcek which combination satisfies the number of correct digits at least partily of the clues (for now we will not check if the numbers are well placed or not)
+        for (int j = possibleCombinations.size() - 1; j >= 0; j--) {
+            if (!checkIfCombinationSatisfiesClues(possibleCombinations.get(j),true)) {
+                possibleCombinations.remove(j);
             }
         }
         
 
-        
-    }
+        }
 
-     private void generatePossibleCombinationsFromClue() {
-        // initialize the possible combinations
-       possibleCombinations = new ArrayList<>();
+        // remove the combinations that are in the invalid combinations list
+         for (Integer[] invalidCombination : invalidCombinations) {
+            for (int i = possibleCombinations.size() - 1; i >= 0; i--) {
+                if (Arrays.equals(possibleCombinations.get(i), invalidCombination)) {
+                    possibleCombinations.remove(i);
+                }
+            }
+            
+        }
 
-       // get the numbers that are in the clue
-
-        generateCombinationsFromClues(possibleCombinations, new Integer[code.length], 0);
-
-        System.out.println();
-        System.out.println("size of possible combinations before removing banned numbers: " + possibleCombinations.size());
-
-
-        // remove combinations that doesnt contains ALL the numbers that are in the inCodeIndexUnknown list
-
-        
+        // remove the same combinations
         for (int i = possibleCombinations.size() - 1; i >= 0; i--) {
-            Integer[] combination = possibleCombinations.get(i);
-            for (Integer digit : inCodeIndexUnknown) {
-                if (!Arrays.asList(combination).contains(digit)) {
+            for (int j = i - 1; j >= 0; j--) {
+                if (Arrays.equals(possibleCombinations.get(i), possibleCombinations.get(j))) {
                     possibleCombinations.remove(i);
                     break;
                 }
             }
         }
+
+
+        // remove all combinations that do not satisfy the clue
+       if( possibleCombinations.size() > 1){
+        if(possibleCombinations.size() == 1){
+            // add all those digits to the inCodeIndexUnknown list
+            for (Integer digit : possibleCombinations.get(0)) {
+                if (!inCodeIndexUnknown.contains(digit)) {
+                    inCodeIndexUnknown.add(digit);
+                }
+
+                // print - updated the inCodeIndexUnknown list
+                System.out.println("updated the inCodeIndexUnknown list: " + inCodeIndexUnknown.toString());
+
+            }
+        } else {
+
+            // print the possible combinations
+            System.out.println("the possible combinations: ");
+            for (Integer[] combination : possibleCombinations) {
+                System.out.println(Arrays.toString(combination));
+            }
+
+        // check which combination satisfies the most clues
+        int maxSatisfies = 0;
+        int maxSatisfiesIndex = 0;
+        for (int i = 0; i < possibleCombinations.size(); i++) {
+            int numSatisfies = 0;
+            for (Clue clue : clues) {
+                if (checkIfCombinationSatisfiesClues(possibleCombinations.get(i),true)) {
+                    numSatisfies++;
+                }
+            }
+
+            // print how many clues the combination satisfies
+            System.out.println("the combination: " + Arrays.toString(possibleCombinations.get(i)) + " satisfies " + numSatisfies + " clues");
+
+            if (numSatisfies > maxSatisfies) {
+                maxSatisfies = numSatisfies;
+                maxSatisfiesIndex = i;
+            } 
+            
+            if(numSatisfies == maxSatisfies){
+                // we will add the most common number in both combinations to the inCodeIndexUnknown list
+                // first we will find the most common number in both combinations
+
+                // check which one fully satisfies most clues
+                int numSatisfies1 = 0;
+                int numSatisfies2 = 0;
+                for (Clue clue2 : clues) {
+                    // print each clue
+                    
+                    if (checkIfCombinationSatisfiesClue(possibleCombinations.get(i), clue2)) {
+                        numSatisfies1++;
+                    }
+
+                    if (checkIfCombinationSatisfiesClue(possibleCombinations.get(maxSatisfiesIndex), clue2)) {
+                        numSatisfies2++;
+                    }
+                }
+
+                if(numSatisfies1 > numSatisfies2){
+                    maxSatisfiesIndex = i;
+                } else if(numSatisfies1 == numSatisfies2){
+
+
+                    // print both satisfies the same number of clues
+                    System.out.println("both fully satisfies the same number of clues");
+                } 
+
+                // if the combinations are not the same 
+                if (!Arrays.equals(possibleCombinations.get(i), possibleCombinations.get(maxSatisfiesIndex))) {
+                    // find the most common number in both combinations
+
+                int mostCommonNumber = 0;
+                int mostCommonNumberCount = 0;
+                for (Integer number : possibleCombinations.get(i)) {
+                    int count = 0;
+                    for (Integer number2 : possibleCombinations.get(maxSatisfiesIndex)) {
+                        if (number == number2) {
+                            count++;
+                        }
+                    }
+
+                    
+
+
+                    if (count > mostCommonNumberCount && !inCodeIndexUnknown.contains(number) ){
+                        mostCommonNumberCount = count;
+                        mostCommonNumber = number;
+                    }
+                }
+
+                // print the combination
+                System.out.println("the combination: " + Arrays.toString(possibleCombinations.get(i)) + " and the combination: " + Arrays.toString(possibleCombinations.get(maxSatisfiesIndex)) + " both fully satisfies the same number of clues and the most common number is " + mostCommonNumber + " and the count is " + mostCommonNumberCount);
+                // print the count and the number
+                System.out.println("the most common number is " + mostCommonNumber + " and the count is " + mostCommonNumberCount);
+
+
+                // add the most common number to the inCodeIndexUnknown list
+                if (!inCodeIndexUnknown.contains(mostCommonNumber)) {
+                    inCodeIndexUnknown.add(mostCommonNumber);
+                }
+
+                
+
+                // print - updated the inCodeIndexUnknown list
+                System.out.println("updated the inCodeIndexUnknown list: " + inCodeIndexUnknown.toString());
+            }
+        }
+                
+            
+        }
+
+        // print the maxSatisfies and the maxSatisfiesIndex
+        System.out.println("the maxSatisfies: " + maxSatisfies + " and the maxSatisfiesIndex: " + maxSatisfiesIndex + " and the combination: " + Arrays.toString(possibleCombinations.get(maxSatisfiesIndex)));
+
+
+        }
+
+
+
+        } else {
+
+
+
+
+            // problem
+            System.out.println("problem with the clue " + clues.get(clueIndex).getHintMessage());
+            System.out.println("the size of the possible combinations: " + possibleCombinations.size());
+
+            // print the possible combinations
+            System.out.println("the possible combinations: ");
+            for (Integer[] combination : possibleCombinations) {
+                System.out.println(Arrays.toString(combination));
+            }
+        }
         
     }
 
-    private void generateCombinationsFromClues(ArrayList<Integer[]> combinations, Integer[] currentCombination, int index, List<Integer> temp_bannedList, List<List<Integer>> temp_bannedListPerIndex) {
-        if(index == code.length){
-            combinations.add(currentCombination);
-            return;
+    private void generateCombinationsOneClue(ArrayList<Integer[]> possibleCombinations, List<Integer> numbers, int numCorrectDigits) {
+        int[] indices = new int[numCorrectDigits];
+        int lastIndex = numCorrectDigits - 1;
+    
+        // Initialize indices
+        for (int i = 0; i < numCorrectDigits; i++) {
+            indices[i] = i;
         }
-
-        if(code[index] != null){
-            currentCombination[index] = code[index];
-            generateCombinations(combinations, currentCombination, index + 1);
-            return;
-        } 
-
-        for (int digit = 0; digit < 10; digit++) {
-            if (!bannedList.contains(digit) && !bannedListPerIndex.get(index).contains(digit)) {
-
-                currentCombination[index] = digit;
-                generateCombinations(combinations, currentCombination, index + 1);
+    
+        while (indices[0] < numbers.size() - numCorrectDigits + 1) {
+            Integer[] combination = new Integer[numCorrectDigits];
+    
+            // Build the combination
+            for (int i = 0; i < numCorrectDigits; i++) {
+                combination[i] = numbers.get(indices[i]);
+            }
+    
+            possibleCombinations.add(combination);
+    
+            // Move to the next combination
+            if (indices[lastIndex] < numbers.size() - 1) {
+                indices[lastIndex]++;
+            } else {
+                int j = lastIndex;
+                while (j > 0 && indices[j] == numbers.size() - numCorrectDigits + j) {
+                    j--;
+                }
+    
+                indices[j]++;
+                for (int k = j + 1; k < numCorrectDigits; k++) {
+                    indices[k] = indices[k - 1] + 1;
+                }
             }
         }
-
     }
 
-        // a method to check if a combinatuion satisfies a clue
-    private boolean combinationSatisfiesClue(Integer[] combination, Clue clue) {
-        // check if the combination satisfies the clue
-        // check if the number of correct digits is the same as the number of correct digits in the clue
+        // check if the combination satisfies the clues with the placement of the numbers - make a shorter method name
+    private boolean checkIfComboValid(Integer[] combination , Clue clue) {
         int numCorrectDigits = 0;
-        for (int i = 0; i < combination.length; i++) {
-            if (combination[i] != null && clue.getCombination().get(i) != null && combination[i] == clue.getCombination().get(i)) {
+        int numCorrectDigitsWellPlaced = 0;
+        int numCorrectDigitsIncorrectlyPlaced = 0;
+
+
+        for (int i = 0; i < clue.getCombination().size(); i++) {
+            // only check if the number is correct we dont care if it is well placed or not
+            if (clue.getCombination().get(i) != null && Arrays.asList(combination).contains(clue.getCombination().get(i))) {
+                numCorrectDigits++;
+
+                // check if the number is well placed
+                if (clue.getCombination().get(i) == combination[i]) {
+                    numCorrectDigitsWellPlaced++;
+                } else {
+                    numCorrectDigitsIncorrectlyPlaced++;
+                }
+            }
+
+            // if the numbers correct digits is greater than the number of correct digits of the clue then return false
+            if (numCorrectDigits > clue.getCorrectDigits()) {
+                        // if it's 3 9 1 7 in this orde print the clue and the combination
+                        
+                        if(Arrays.equals(combination, new Integer[]{3,7,1,9})){
+                            System.out.println("combo: " + Arrays.toString(combination) + " clue: " + clue.getCombination().toString() + " numCorrectDigits(combo): " + numCorrectDigits + " correctDigits: " + clue.getCorrectDigits());
+                        }
+
+                // in this case the combination has more correct digits than the clue so it is not a valid combination so we will add it to the invalid combinations list
+                invalidCombinations.add(combination);
+                return false;
+            }
+
+            if (numCorrectDigitsWellPlaced > clue.getWellPlacedDigits()) {
+                // in this case the combination has more correct digits that are well placed than the clue so it is not a valid combination so we will add it to the invalid combinations list
+                // print combo and clue and numCorrectDigitsWellPlaced and clue.getWellPlacedDigits()
+         //       System.out.println("combo: " + Arrays.toString(combination) + " clue: " + clue.getCombination().toString() + " numCorrectDigitsWellPlaced(combo): " + numCorrectDigitsWellPlaced + " wellPlacedDigits: " + clue.getWellPlacedDigits());
+                
+                // if it's 3 9 1 7 in this orde print the clue and the combination
+                if(Arrays.equals(combination, new Integer[]{3,7,1,9})){
+                    System.out.println("combo: " + Arrays.toString(combination) + " clue: " + clue.getCombination().toString() + " numCorrectDigitsWellPlaced(combo): " + numCorrectDigitsWellPlaced + " wellPlacedDigits: " + clue.getWellPlacedDigits());
+                }
+         invalidCombinations.add(combination);
+                return false;
+            }
+
+            if (numCorrectDigitsIncorrectlyPlaced > clue.getIncorrectlyPlacedDigits()) {
+                // in this case the combination has more correct digits that are incorrectly placed than the clue so it is not a valid combination so we will add it to the invalid combinations list
+                // print combo and clue and numCorrectDigitsIncorrectlyPlaced and clue.getIncorrectlyPlacedDigits()
+ //               System.out.println("combo: " + Arrays.toString(combination) + " clue: " + clue.getCombination().toString() + " numCorrectDigitsIncorrectlyPlaced(combo): " + numCorrectDigitsIncorrectlyPlaced + " incorrectlyPlacedDigits: " + clue.getIncorrectlyPlacedDigits());
+                // if it's 3 9 1 7 in this orde print the clue and the combination
+                if(Arrays.equals(combination, new Integer[]{3,7,1,9})){
+                    System.out.println("combo: " + Arrays.toString(combination) + " clue: " + clue.getCombination().toString() + " numCorrectDigitsIncorrectlyPlaced(combo): " + numCorrectDigitsIncorrectlyPlaced + " incorrectlyPlacedDigits: " + clue.getIncorrectlyPlacedDigits());
+                }
+ 
+ invalidCombinations.add(combination);
+                return false;
+            }
+
+
+
+           
+
+        }
+
+         if (code.length - combination.length < clue.getCorrectDigits() - numCorrectDigits && code.length != combination.length) {
+                System.out.println("combo: " + Arrays.toString(combination) + " clue: " + clue.getCombination().toString() + " numCorrectDigits(the number of correct digits in the combination): " + numCorrectDigits + " correctDigits: " + clue.getCorrectDigits());
+
+                // print the code length - the length of the combination(which equals the numbers that have to be right and we just dont know which numbers from the clue are right but we know how many have to be right) and the number of correct digits
+                System.out.println("code length is " + code.length + " and the length of the combination is " + combination.length + " and the number of correct digits is " + clue.getCorrectDigits());
+                invalidCombinations.add(combination); 
+                
+                return false;
+         } 
+
+        
+
+        if (numCorrectDigits != clue.getCorrectDigits() || numCorrectDigitsWellPlaced != clue.getWellPlacedDigits() || numCorrectDigitsIncorrectlyPlaced != clue.getIncorrectlyPlacedDigits()) {
+         //   System.out.println("the combination " + Arrays.toString(combination) + " does not satisfy the clue " + clue.getCombination().toString() + " with the placement of the numbers");
+            return false;
+        }
+
+
+        return true;
+    }
+    
+
+
+    // check if the combination satisfies one clue
+    private boolean checkIfCombinationSatisfiesClue(Integer[] combination, Clue clue) {
+        int numCorrectDigits = 0;
+        for (int i = 0; i < clue.getCombination().size(); i++) {
+            // only check if the number is correct we dont care if it is well placed or not
+            if (clue.getCombination().get(i) != null && Arrays.asList(combination).contains(clue.getCombination().get(i))) {
                 numCorrectDigits++;
             }
+
+            // if the numbers correct digits is greater than the number of correct digits of the clue then return false
+            if (numCorrectDigits > clue.getCorrectDigits()) {
+                
+                // in this case the combination has more correct digits than the clue so it is not a valid combination so we will add it to the invalid combinations list
+                invalidCombinations.add(combination);
+                return false;
+            }
+
+           
+
         }
+
+         if (code.length - combination.length < clue.getCorrectDigits() - numCorrectDigits && code.length != combination.length) {
+                System.out.println("combo: " + Arrays.toString(combination) + " clue: " + clue.getCombination().toString() + " numCorrectDigits(the number of correct digits in the combination): " + numCorrectDigits + " correctDigits: " + clue.getCorrectDigits());
+
+                // print the code length - the length of the combination(which equals the numbers that have to be right and we just dont know which numbers from the clue are right but we know how many have to be right) and the number of correct digits
+                System.out.println("code length is " + code.length + " and the length of the combination is " + combination.length + " and the number of correct digits is " + clue.getCorrectDigits());
+                invalidCombinations.add(combination); 
+                
+                return false;
+            } 
+
+        
 
         if (numCorrectDigits != clue.getCorrectDigits()) {
             return false;
         }
 
-        // check if the number of well placed digits is the same as the number of well placed digits in the clue
-        int numWellPlacedDigits = 0;
-        for (int i = 0; i < combination.length; i++) {
-            if (combination[i] != null && clue.getCombination().get(i) != null && combination[i] == clue.getCombination().get(i) && combination[i] == code[i]) {
-                numWellPlacedDigits++;
+        return true;
+    }
+
+
+
+    //                
+
+    // for now all we will do is we will just check if the numbers in the combination matches the correct digits of the clues (for now we will not check if the numbers are well placed or not)
+    // the sutifiesPartially is used in cases where no combination satisfies all the clues and then we will use this method to check if the combination satisfies the clues partially
+    private boolean checkIfCombinationSatisfiesClues(Integer[] combination, boolean sutifiesPartially)  { 
+        int numSatifies = 0;
+
+        for (Clue clue : clues) {
+
+            // if skipClue is true then skip the clue
+            
+
+            int numCorrectDigits = 0;
+            for (int i = 0; i < clue.getCombination().size(); i++) {
+                    // only check if the number is correct we dont care if it is well placed or not
+                    if (clue.getCombination().get(i) != null && Arrays.asList(combination).contains(clue.getCombination().get(i))) {
+                        numCorrectDigits++;
+                    }
             }
-        }
 
-        if (numWellPlacedDigits != clue.getWellPlacedDigits()) {
-            return false;
-        }
+            if (numCorrectDigits != clue.getCorrectDigits() && !sutifiesPartially) {
+                
+                // print just the combo, the combination of clue and the number of correct digits and how the clue needs to have
+                System.out.println("combo: " + Arrays.toString(combination) + " clue: " + clue.getCombination().toString() + " numCorrectDigits: " + numCorrectDigits + " correctDigits: " + clue.getCorrectDigits());
 
-        // check if the number of incorrectly placed digits is the same as the number of incorrectly placed digits in the clue
-        int numIncorrectlyPlacedDigits = 0;
-        for (int i = 0; i < combination.length; i++) {
-            if (combination[i] != null && clue.getCombination().get(i) != null && combination[i] == clue.getCombination().get(i) && combination[i] != code[i]) {
-                numIncorrectlyPlacedDigits++;
+                return false;
+            } 
+
+            // even if partically satisfies the clue, if the code length - the length of the combination(which equals the numbers that have to be right and we just dont know which numbers from the clue are right but we know how many have to be right) is less than the number of correct digits then it is not a valid combination
+            if (code.length - combination.length < clue.getCorrectDigits() - numCorrectDigits) {
+                // print the code length - the length of the combination(which equals the numbers that have to be right and we just dont know which numbers from the clue are right but we know how many have to be right) and the number of correct digits
+                System.out.println("code length is " + code.length + " and the length of the combination is " + combination.length + " and the number of correct digits is " + clue.getCorrectDigits());
+                invalidCombinations.add(combination); 
+                
+                return false;
+            } 
+
+            if (numCorrectDigits > clue.getCorrectDigits()) {
+                return false;
             }
-        }
-
-        if (numIncorrectlyPlacedDigits != clue.getIncorrectlyPlacedDigits()) {
-            return false;
+            
+            
         }
 
         return true;
-    }   
+    }
+
+
+    // get possible combinations
+    public ArrayList<Integer[]> getPossibleCombinations() {
+        return possibleCombinations;
+    }
 
 
 }
