@@ -37,11 +37,9 @@ public class CrackTheCode {
         // solution: 1, 6, 4
 
         solver = new Solver(clues);
-        solver.setDebug(true);
         solution = new Integer[]{1, 6, 4};
         solutionSolver = solver.solve();
         passOrFail(solution, solutionSolver, 2);
-        solver.setDebug(false);
 
 
         // test case 3:

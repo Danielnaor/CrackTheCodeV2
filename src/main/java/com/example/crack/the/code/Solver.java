@@ -10,7 +10,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
-import java.util.logging.Logger;
 
 /**
  *
@@ -77,7 +76,7 @@ public class Solver {
     private int maxNumber = 0;
 
     // logger
-    private static final Logger logger = Logger.getLogger(Solver.class.getName());
+   // private static final Logger logger = Logger.getLogger(Solver.class.getName());
     
     public Solver(List<Clue> clues) {
         this.clues = new ArrayList<>();
@@ -111,10 +110,10 @@ public class Solver {
     public Integer[] solve() throws IOException{
 
         if(debug){
-            logger.info("the clues before removing nothing is correct: ");
+            System.out.println("the clues before removing nothing is correct: ");
             for (Clue clue : clues) {
                 //System.out.println(clue.toString());
-                logger.info(clue.toString());
+                System.out.println(clue.toString());
             }
         }
 
@@ -127,7 +126,7 @@ public class Solver {
         
         
         
-         if (isSolved()) {
+        if (isSolved()) {
             solved = true;
             return code;
         }
@@ -141,10 +140,10 @@ public class Solver {
 
         if(debug){
     
-            logger.info("the clues after removing invalid numbers and banned numbers: ");
+            System.out.println("the clues after removing invalid numbers and banned numbers: ");
             for (Clue clue : clues) {
                 //System.out.println(clue.toString());
-                logger.info(clue.toString());
+                System.out.println(clue.toString());
             }
         }
         
@@ -431,8 +430,15 @@ public class Solver {
 
         
 
-        HashSet<Integer> allNumbers = getAllNumbersInClues(clues);
+        HashSet<Integer> allNumbers = getAllNumbersInClues();
         
+        // add the numbers in the inCodeIndexUnknown list to the allNumbers list
+        for (Integer number : inCodeIndexUnknown) {
+                if(debug)
+                    System.out.println("adding number " + number + " to the allNumbers list");
+                allNumbers.add(number);
+        }
+
         if(debug)
             System.out.println("all numbers: " + allNumbers.toString());
         
@@ -457,7 +463,7 @@ public class Solver {
 
     
 
-    public HashSet<Integer> getAllNumbersInClues(List<Clue> clues) {
+    public HashSet<Integer> getAllNumbersInClues() {
         HashSet<Integer> allNumbers = new HashSet<>();
         for(Clue clue:clues){
             for(Integer number:clue.getCombination()){
@@ -534,7 +540,7 @@ public class Solver {
 
                             // replace the number in the combination with null
                             if(debug)
-                                System.out.println("combo before: " + clue.getCombinationObject().toString());
+                                System.out.println("combo before removing numebr: " + clue.getCombinationObject().toString());
                           
                             clue.getCombination().set(i, null);
                             clue.getCombinationObject().combination.set(i, null);
