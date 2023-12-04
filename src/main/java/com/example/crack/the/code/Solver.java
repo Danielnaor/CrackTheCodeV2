@@ -584,21 +584,27 @@ public class Solver {
                         }
                           else{ // in this case we have some correct numbers that are well placed and some correct numbers that are not well placed
                         
-                            // check if the numbers is in the index banned list of all indexes except one
+                            // check if the numbers is in the index banned list of all indexes that are not solved except one
                             int inHowManyBannedLists = 0;
                             int indexNotBanned = 0;
                             for (int j = 0; j < bannedListPerIndex.size(); j++) {
-                               // if (j != i) {
-                                    if (bannedListPerIndex.get(j).contains(clue.getCombination().get(i))) {
+                                if (!solvedIndexes[j]) {
+                                if (bannedListPerIndex.get(j).contains(clue.getCombination().get(i))) {
                                         inHowManyBannedLists++;
                                     } else {
                                         indexNotBanned = j;
                                     }
-                           //     }
+                              }
                             }
 
+                            int numUnsolveIndexes = 0;
+                            for(boolean indexSolved:solvedIndexes){
+                                if(!indexSolved){
+                                    numUnsolveIndexes++;
+                                }
+                            }
                             // if the number is in all the banned lists except one then the number is in the index that is not banned
-                            if (inHowManyBannedLists == bannedListPerIndex.size() - 1) {
+                            if (inHowManyBannedLists == numUnsolveIndexes - 1) {
 
                                 
                                 code[indexNotBanned] = clue.getCombination().get(i);
@@ -682,10 +688,26 @@ public class Solver {
 
     private boolean isSolved() {
 
+
+
+
+
         // if the possible combinations is 1 then the code is solved
         if ( possibleCombinations != null && possibleCombinations.size() == 1) {
             code = possibleCombinations.get(0);
             return true;
+        }
+
+        if (clues.size() == 0){
+            generatePossibleCombinations();
+
+            if (possibleCombinations.size() == 1) {
+                code = possibleCombinations.get(0);
+                return true;
+            } else if (possibleCombinations.size() == 0) {
+                throw new RuntimeException("the code is not solved and there are no possible combinations left and the number of clues is 0");
+            }
+
         }
 
         removeBannedNumbers();
@@ -1315,6 +1337,13 @@ public class Solver {
     // set debug
     public void setDebug(boolean debug) {
         this.debug = debug;
+    }
+
+    // ban num at index
+    public void banNumAtIndex(int index, int num) {
+        if (!bannedListPerIndex.get(index).contains(num)) {
+            bannedListPerIndex.get(index).add(num);
+        }
     }
 
 
