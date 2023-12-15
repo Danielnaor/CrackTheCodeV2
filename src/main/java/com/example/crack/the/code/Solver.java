@@ -24,9 +24,9 @@ The way the solver eliminates possible combinations is by using the clues to eli
 
 1. find all the clues that that thier combinations are nothing is correct and eliminate all the instances of the digits in the combinations of the clues from the possible combinations.
 for example if the clue is 1 2 3 nothing is correct and a clue is 1 2 4 one number is correct and well placed the code will replace the 1 and 2 in the clue with -1 to indicate that the numbers are not valid.
-2. then the solver will check if there is any clue that were solved
+2. then the solver will check if there is any clue that were solvedCode
 3. then it will check if there is any conflicting cases meaning that there are 2 clues with the a number that is the same for both indexes and in one clue the number is correct and well placed and in the other clue the number is correct but wrongly placed. if there is a conflicting case then the number is not gonna be in the code.
-4. then it will check if there is any clue that were solved
+4. then it will check if there is any clue that were solvedCode
 5. then it will generate all the possible combinations that can be generated from the clues. (all the numbers in the clues are the possible numbers that can be in the code)
 6. check each possible combination if it satisfies all the clues. if it does then it is the correct code.
 
@@ -40,10 +40,10 @@ for example if the clue is 1 2 3 nothing is correct and a clue is 1 2 4 one numb
 
 public class Solver {
 
-    // the code to be solved
+    // the code to be solvedCode
     private Integer[] code;
 
-    // store the indexes that are solved
+    // store the indexes that are solvedCode
     private boolean[] solvedIndexes;
 
     private int numSolvedIndexes = 0;
@@ -54,8 +54,8 @@ public class Solver {
     // the clues
     private List<Clue> clues;
 
-    // a boolean to indicate if the code was solved
-    private boolean solved;
+    // a boolean to indicate if the code was solvedCode
+    private boolean solvedCode;
 
     // banned list - will store the numbers that are eliminated from all indexes
     private List<Integer> bannedList;
@@ -75,6 +75,8 @@ public class Solver {
     // the max number
     private int maxNumber = 0;
 
+    private Validator validator;
+
     // logger
    // private static final Logger logger = Logger.getLogger(Solver.class.getName());
     
@@ -85,7 +87,7 @@ public class Solver {
             this.clues.add(clue.clone());
         }
 
-        this.solved = false;
+        this.solvedCode = false;
 
         Integer codeLength = 0;
         if  (!clues.isEmpty()) {
@@ -109,6 +111,13 @@ public class Solver {
     // solve the riddle
     public Integer[] solve() throws IOException{
 
+        // if len of clues is then return;
+        if(clues.size() == 0){
+            return code;
+        }
+
+        
+
         if(debug){
             System.out.println("the clues before removing nothing is correct: ");
             for (Clue clue : clues) {
@@ -127,7 +136,7 @@ public class Solver {
         
         
         if (isSolved()) {
-            solved = true;
+            solvedCode = true;
             return code;
         }
         
@@ -159,10 +168,10 @@ public class Solver {
         }
 
 
-        // check if there is the code is solved and/or if any clue is solved
-        // check if we solved the code
+        // check if there is the code is solvedCode and/or if any clue is solvedCode
+        // check if we solvedCode the code
         if (isSolved()) {
-            solved = true;
+            solvedCode = true;
             return code;
         }
 
@@ -179,12 +188,9 @@ public class Solver {
         }
         
 
-       // numSolvedIndexes
-       for(boolean indexSolved:solvedIndexes){
-           if(indexSolved){
-               numSolvedIndexes++;
-           }
-        }
+       // update the number of solved indexes
+         updateNumSolvedIndexes();
+
 
         if(numSolvedIndexes == 0 && possibleCombinations != null && possibleCombinations.size() >= 1){
             int clueIndex = maxCorrectDigitsClue(); // the index of the clue that has the most correct digits
@@ -222,7 +228,7 @@ public class Solver {
         }
     
          if (isSolved()) {
-            solved = true;
+            solvedCode = true;
             return code;
         }
 
@@ -271,10 +277,20 @@ public class Solver {
         }
         
         
+        // validator 
+        validator = new Validator.Builder()
+                .code(code)
+                .clues(clues)
+                .build();
+
+
         for(Clue clue:clues){
             // loop trougth the possible combinations and check if the combination satisfies the clue
             for (int i = possibleCombinations.size() - 1; i >= 0; i--) {
-                if (!checkIfComboValid(possibleCombinations.get(i), clue)) {
+                
+
+               // if (!checkIfComboValid(possibleCombinations.get(i), clue)) {
+                if(!validator.checkIfComboValid(possibleCombinations.get(i), clue)){
                     possibleCombinations.remove(i);
 
                 }
@@ -291,7 +307,7 @@ public class Solver {
 
 
         if(isSolved()){
-            solved = true;
+            solvedCode = true;
             return code;
         }
         
@@ -316,7 +332,7 @@ public class Solver {
     
 
     private void updateBannedListFromUnknown() {
-        // compare with the inCodeIndexUnknown list and the clues and see if the codes can be solved
+        // compare with the inCodeIndexUnknown list and the clues and see if the codes can be solvedCode
         // an example 
         // if the inCodeIndexUnknown list is 1 3 7
         // and a clue is 4, null, 7, 3 with 2 correct digits and 1 well placed digit and 1 incorrectly placed digit
@@ -520,7 +536,7 @@ public class Solver {
     }
 
     private void checkIfClueSolved() {
-        // if the number of numbers that are not nulls in the combination is the same as the number of correct digits then the clue is solved
+        // if the number of numbers that are not nulls in the combination is the same as the number of correct digits then the clue is solvedCode
         for (Clue clue : clues) {
             clue.getCombinationObject().updateNumNotNull();
             if (clue.getCombinationObject().numNotNull == clue.getCorrectDigits() && clue.getCorrectDigits() > 0) {
@@ -584,7 +600,7 @@ public class Solver {
                         }
                           else{ // in this case we have some correct numbers that are well placed and some correct numbers that are not well placed
                         
-                            // check if the numbers is in the index banned list of all indexes that are not solved except one
+                            // check if the numbers is in the index banned list of all indexes that are not solvedCode except one
                             int inHowManyBannedLists = 0;
                             int indexNotBanned = 0;
                             for (int j = 0; j < bannedListPerIndex.size(); j++) {
@@ -645,7 +661,7 @@ public class Solver {
 
         
 
-        // remove the clues that are solved
+        // remove the clues that are solvedCode
         for (int i = 0; i < clues.size(); i++) {
             if (clues.get(i).getCorrectDigits() == 0) {
                 clues.remove(i);
@@ -688,17 +704,25 @@ public class Solver {
 
     private boolean isSolved() {
 
+    
 
 
 
 
-        // if the possible combinations is 1 then the code is solved
+
+        // if the possible combinations is 1 then the code is solvedCode
         if ( possibleCombinations != null && possibleCombinations.size() == 1) {
             code = possibleCombinations.get(0);
+            
             return true;
         }
 
-        if (clues.size() == 0){
+        // call a method that will update numSolvedIndexes to the number of indexes that are solved. 
+        updateNumSolvedIndexes();
+
+
+        //either the must include number have somthing or the known index have somthing
+        if (clues.size() == 0 && (inCodeIndexUnknown.size() > 0 || numSolvedIndexes > 0)) {
             generatePossibleCombinations();
 
             if (possibleCombinations.size() == 1) {
@@ -711,7 +735,7 @@ public class Solver {
         }
 
         removeBannedNumbers();
-        // check for any solved clues
+        // check for any solvedCode clues
         checkIfClueSolved();
 
         // check if there is only one index that the numbers without a known index can be in
@@ -740,6 +764,18 @@ public class Solver {
         }
 
         return false;
+    }
+
+    
+
+    private void updateNumSolvedIndexes() {
+        numSolvedIndexes = 0;
+        
+        for(boolean indexSolved:solvedIndexes){
+            if(indexSolved){
+                numSolvedIndexes++;
+            }
+        }
     }
 
     /**
@@ -913,9 +949,17 @@ public class Solver {
 
         // now chcek which combination satisfies the number of correct digits of the clues (for now we will not check if the numbers are well placed or not)
         for (int j = possibleCombinations.size() - 1; j >= 0; j--) {
-            if (!checkIfCombinationSatisfiesClues(possibleCombinations.get(j),false)) {
+
+            // initialize the validator using the builder
+            validator = new Validator.Builder()
+            .code(code)
+            .clues(clues)
+            .build();
+
+            if (!validator.checkIfCombinationSatisfiesClues(possibleCombinations.get(j),false)) {
                 possibleCombinations.remove(j);
             }
+
         }
 
         // if all combinations do not satisfy the clues then regenerate the combinations but this time we will check if the combinations satisfy the clues partially
@@ -944,9 +988,18 @@ public class Solver {
             System.out.println("with partial: ");
         // now chcek which combination satisfies the number of correct digits at least partily of the clues (for now we will not check if the numbers are well placed or not)
         for (int j = possibleCombinations.size() - 1; j >= 0; j--) {
-            if (!checkIfCombinationSatisfiesClues(possibleCombinations.get(j),true)) {
+
+            // initialize the validator using the builder
+            validator = new Validator.Builder()
+            .code(code)
+            .clues(clues)
+            .build();
+
+            if (!validator.checkIfCombinationSatisfiesClues(possibleCombinations.get(j),true)) {
                 possibleCombinations.remove(j);
             }
+
+            
         }
         
 
@@ -1002,9 +1055,18 @@ public class Solver {
         for (int i = 0; i < possibleCombinations.size(); i++) {
             int numSatisfies = 0;
             for (Clue clue : clues) {
-                if (checkIfCombinationSatisfiesClues(possibleCombinations.get(i),true)) {
+
+                // reinitialize the validator using the builder
+                validator = new Validator.Builder()
+                .code(code)
+                .clues(clues)
+                .build();
+
+                if (validator.checkIfCombinationSatisfiesClue(possibleCombinations.get(i), clue)) {
                     numSatisfies++;
                 }
+
+                
             }
 
             // print how many clues the combination satisfies
@@ -1023,14 +1085,23 @@ public class Solver {
                 // check which one fully satisfies most clues
                 int numSatisfies1 = 0;
                 int numSatisfies2 = 0;
+
+
                 for (Clue clue2 : clues) {
                     // print each clue
                     
-                    if (checkIfCombinationSatisfiesClue(possibleCombinations.get(i), clue2)) {
+                    // reinitialize the validator using the builder
+                    validator = new Validator.Builder()
+                    .code(code)
+                    .clues(clues)
+                    .build();
+                    
+
+                    if (validator.checkIfCombinationSatisfiesClue(possibleCombinations.get(i), clue2)) {
                         numSatisfies1++;
                     }
 
-                    if (checkIfCombinationSatisfiesClue(possibleCombinations.get(maxSatisfiesIndex), clue2)) {
+                    if (validator.checkIfCombinationSatisfiesClue(possibleCombinations.get(maxSatisfiesIndex), clue2)) {
                         numSatisfies2++;
                     }
                 }
@@ -1158,176 +1229,8 @@ public class Solver {
         }
     }
 
-        // check if the combination satisfies the clues with the placement of the numbers - make a shorter method name
-    private boolean checkIfComboValid(Integer[] combination , Clue clue) {
-        int numCorrectDigits = 0;
-        int numCorrectDigitsWellPlaced = 0;
-        int numCorrectDigitsIncorrectlyPlaced = 0;
-
-
-        for (int i = 0; i < clue.getCombination().size(); i++) {
-            // only check if the number is correct we dont care if it is well placed or not
-            if (clue.getCombination().get(i) != null && Arrays.asList(combination).contains(clue.getCombination().get(i))) {
-                numCorrectDigits++;
-
-                // check if the number is well placed
-                if (clue.getCombination().get(i) == combination[i]) {
-                    numCorrectDigitsWellPlaced++;
-                } else {
-                    numCorrectDigitsIncorrectlyPlaced++;
-                }
-            }
-
-            // if the numbers correct digits is greater than the number of correct digits of the clue then return false
-            if (numCorrectDigits > clue.getCorrectDigits()) {
-                        
-                        
-
-                // in this case the combination has more correct digits than the clue so it is not a valid combination so we will add it to the invalid combinations list
-                invalidCombinations.add(combination);
-                return false;
-            }
-
-            if (numCorrectDigitsWellPlaced > clue.getWellPlacedDigits()) {
-                // in this case the combination has more correct digits that are well placed than the clue so it is not a valid combination so we will add it to the invalid combinations list
-                // print combo and clue and numCorrectDigitsWellPlaced and clue.getWellPlacedDigits()
-         //       System.out.println("combo: " + Arrays.toString(combination) + " clue: " + clue.getCombination().toString() + " numCorrectDigitsWellPlaced(combo): " + numCorrectDigitsWellPlaced + " wellPlacedDigits: " + clue.getWellPlacedDigits());
-                
-               
-         invalidCombinations.add(combination);
-                return false;
-            }
-
-            if (numCorrectDigitsIncorrectlyPlaced > clue.getIncorrectlyPlacedDigits()) {
-                // in this case the combination has more correct digits that are incorrectly placed than the clue so it is not a valid combination so we will add it to the invalid combinations list
-                // print combo and clue and numCorrectDigitsIncorrectlyPlaced and clue.getIncorrectlyPlacedDigits()
- //               System.out.println("combo: " + Arrays.toString(combination) + " clue: " + clue.getCombination().toString() + " numCorrectDigitsIncorrectlyPlaced(combo): " + numCorrectDigitsIncorrectlyPlaced + " incorrectlyPlacedDigits: " + clue.getIncorrectlyPlacedDigits());
-                
-                invalidCombinations.add(combination);
-                return false;
-            }
-
-
-
-           
-
-        }
-
-         if (code.length - combination.length < clue.getCorrectDigits() - numCorrectDigits && code.length != combination.length) {
-
-                // print the code length - the length of the combination(which equals the numbers that have to be right and we just dont know which numbers from the clue are right but we know how many have to be right) and the number of correct digits
-                if(debug)
-                    System.out.println("code length is " + code.length + " and the length of the combination is " + combination.length + " and the number of correct digits is " + clue.getCorrectDigits());
-                invalidCombinations.add(combination); 
-                
-                return false;
-         } 
-
         
-
-        if (numCorrectDigits != clue.getCorrectDigits() || numCorrectDigitsWellPlaced != clue.getWellPlacedDigits() || numCorrectDigitsIncorrectlyPlaced != clue.getIncorrectlyPlacedDigits()) {
-            return false;
-        }
-
-
-        return true;
-    }
     
-
-
-    // check if the combination satisfies one clue
-    private boolean checkIfCombinationSatisfiesClue(Integer[] combination, Clue clue) {
-        int numCorrectDigits = 0;
-        for (int i = 0; i < clue.getCombination().size(); i++) {
-            // only check if the number is correct we dont care if it is well placed or not
-            if (clue.getCombination().get(i) != null && Arrays.asList(combination).contains(clue.getCombination().get(i))) {
-                numCorrectDigits++;
-            }
-
-            // if the numbers correct digits is greater than the number of correct digits of the clue then return false
-            if (numCorrectDigits > clue.getCorrectDigits()) {
-                
-                // in this case the combination has more correct digits than the clue so it is not a valid combination so we will add it to the invalid combinations list
-                invalidCombinations.add(combination);
-                return false;
-            }
-
-           
-
-        }
-
-         if (code.length - combination.length < clue.getCorrectDigits() - numCorrectDigits && code.length != combination.length) {
-            if(debug)   
-                System.out.println("combo: " + Arrays.toString(combination) + " clue: " + clue.getCombination().toString() + " numCorrectDigits(the number of correct digits in the combination): " + numCorrectDigits + " correctDigits: " + clue.getCorrectDigits());
-
-                // print the code length - the length of the combination(which equals the numbers that have to be right and we just dont know which numbers from the clue are right but we know how many have to be right) and the number of correct digits
-                if(debug)
-                    System.out.println("code length is " + code.length + " and the length of the combination is " + combination.length + " and the number of correct digits is " + clue.getCorrectDigits());
-                invalidCombinations.add(combination); 
-                
-                return false;
-            } 
-
-        
-
-        if (numCorrectDigits != clue.getCorrectDigits()) {
-            return false;
-        }
-
-        return true;
-    }
-
-
-
-    //                
-
-    // for now all we will do is we will just check if the numbers in the combination matches the correct digits of the clues (for now we will not check if the numbers are well placed or not)
-    // the sutifiesPartially is used in cases where no combination satisfies all the clues and then we will use this method to check if the combination satisfies the clues partially
-    private boolean checkIfCombinationSatisfiesClues(Integer[] combination, boolean sutifiesPartially)  { 
-        int numSatifies = 0;
-
-        for (Clue clue : clues) {
-
-            // if skipClue is true then skip the clue
-            
-
-            int numCorrectDigits = 0;
-            for (int i = 0; i < clue.getCombination().size(); i++) {
-                    // only check if the number is correct we dont care if it is well placed or not
-                    if (clue.getCombination().get(i) != null && Arrays.asList(combination).contains(clue.getCombination().get(i))) {
-                        numCorrectDigits++;
-                    }
-            }
-
-            if (numCorrectDigits != clue.getCorrectDigits() && !sutifiesPartially) {
-                
-                // print just the combo, the combination of clue and the number of correct digits and how the clue needs to have
-                if(debug)
-                    System.out.println("combo: " + Arrays.toString(combination) + " clue: " + clue.getCombination().toString() + " numCorrectDigits: " + numCorrectDigits + " correctDigits: " + clue.getCorrectDigits());
-
-                return false;
-            } 
-
-            // even if partically satisfies the clue, if the code length - the length of the combination(which equals the numbers that have to be right and we just dont know which numbers from the clue are right but we know how many have to be right) is less than the number of correct digits then it is not a valid combination
-            if (code.length - combination.length < clue.getCorrectDigits() - numCorrectDigits) {
-                // print the code length - the length of the combination(which equals the numbers that have to be right and we just dont know which numbers from the clue are right but we know how many have to be right) and the number of correct digits
-                if(debug)
-                    System.out.println("code length is " + code.length + " and the length of the combination is " + combination.length + " and the number of correct digits is " + clue.getCorrectDigits());
-                invalidCombinations.add(combination); 
-                
-                return false;
-            } 
-
-            if (numCorrectDigits > clue.getCorrectDigits()) {
-                return false;
-            }
-            
-            
-        }
-
-        return true;
-    }
-
 
     // get possible combinations
     public ArrayList<Integer[]> getPossibleCombinations() {
@@ -1344,6 +1247,11 @@ public class Solver {
         if (!bannedListPerIndex.get(index).contains(num)) {
             bannedListPerIndex.get(index).add(num);
         }
+    }
+
+    //get solvedCode
+    public boolean isSolvedCode() {
+        return solvedCode;
     }
 
 
