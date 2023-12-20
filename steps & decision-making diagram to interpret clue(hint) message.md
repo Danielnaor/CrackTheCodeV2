@@ -107,10 +107,11 @@ example: |maybe| E[<pre> A text that needs to be wrapped to another line </pre> 
 ```
 
 <!-- to make sure text is warpped in github, need to change the font size to 0.5em and enable word wrap. -->
+
 <style>
     .mermaid {
         font-size: 0.5em;
-        word-wrap: break-word;
+        
         
     }
 </style>
