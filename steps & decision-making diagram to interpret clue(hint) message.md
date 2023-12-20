@@ -105,6 +105,5 @@ example: |maybe| E[<pre> A text that needs to be wrapped to another line </pre> 
         AI -->|no| AM[<pre> Skip to step 6.5 </pre>  ];
         AM --> AN[<pre> Output - problems and attempt to use step 6. </pre>  ];
 ```
-</details>
 
 
