@@ -63,11 +63,6 @@ example: |maybe| E["`A text that needs to be wrapped to another line`"];
 
   <div style="max-height: 300px; overflow: auto; white-space: nowrap;">
 -->
-<details>
-  <summary>Click to expand</summary>
-
-  <div style="max-height: 300px; overflow: auto; white-space: nowrap;">
-    <div class="mermaid-container">
 
 ```mermaid
         graph TD;
@@ -113,12 +108,4 @@ example: |maybe| E["`A text that needs to be wrapped to another line`"];
         AM --> AN["`Output - problems and attempt to use step 6.`"];
 ```
       
-</div>
-  </div>
 
-  <style>
-    .mermaid-container {
-      font-size: 20px; /* Adjust the font size as needed */
-    }
-  </style>
-</details>
