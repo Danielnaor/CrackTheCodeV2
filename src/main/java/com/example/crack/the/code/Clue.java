@@ -20,6 +20,18 @@ public class Clue {
         this.incorrectlyPlacedDigits = incorrectlyPlacedDigits;
     }
 
+
+
+
+    // builder pattern
+    public Clue(Builder builder){
+        this.combination = builder.combination;
+        this.hintMessage = builder.hintMessage;
+        this.correctDigits = builder.correctDigits;
+        this.wellPlacedDigits = builder.wellPlacedDigits;
+        this.incorrectlyPlacedDigits = builder.incorrectlyPlacedDigits;
+    }
+
     public Combination getCombinationObject() {
         return combination;
     }
@@ -85,5 +97,51 @@ public class Clue {
                 " (Correct: " + correctDigits +
                 ", Well Placed: " + wellPlacedDigits +
                 ", Incorrectly Placed: " + incorrectlyPlacedDigits + ")";
+    }
+
+    // builder pattern
+    public static class Builder {
+        private Combination combination;
+        private String hintMessage;
+        private int correctDigits;
+        private int wellPlacedDigits;
+        private int incorrectlyPlacedDigits;
+
+        public Builder() {
+        }
+
+        public Builder combination(List<Integer> combination) {
+            this.combination = new Combination(combination);
+            return this;
+        }
+
+        public Builder combination(Combination combination) {
+            this.combination = combination;
+            return this;
+        }
+
+        public Builder hintMessage(String hintMessage) {
+            this.hintMessage = hintMessage;
+            return this;
+        }
+
+        public Builder correctDigits(int correctDigits) {
+            this.correctDigits = correctDigits;
+            return this;
+        }
+
+        public Builder wellPlacedDigits(int wellPlacedDigits) {
+            this.wellPlacedDigits = wellPlacedDigits;
+            return this;
+        }
+
+        public Builder incorrectlyPlacedDigits(int incorrectlyPlacedDigits) {
+            this.incorrectlyPlacedDigits = incorrectlyPlacedDigits;
+            return this;
+        }
+
+        public Clue build() {
+            return new Clue(this);
+        }
     }
 }

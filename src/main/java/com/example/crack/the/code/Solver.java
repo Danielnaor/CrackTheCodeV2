@@ -956,7 +956,7 @@ public class Solver {
             .clues(clues)
             .build();
 
-            if (!validator.checkIfCombinationSatisfiesClues(possibleCombinations.get(j),false)) {
+            if (!validator.checkIfCombinationSatisfiesAllClues(possibleCombinations.get(j),false)) {
                 possibleCombinations.remove(j);
             }
 
@@ -995,7 +995,7 @@ public class Solver {
             .clues(clues)
             .build();
 
-            if (!validator.checkIfCombinationSatisfiesClues(possibleCombinations.get(j),true)) {
+            if (!validator.checkIfCombinationSatisfiesAllClues(possibleCombinations.get(j),true)) {
                 possibleCombinations.remove(j);
             }
 
