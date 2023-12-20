@@ -56,56 +56,52 @@ Step 6. check how many numbers are in the message - example of a message with 2 
                     - for now, we will assume that the first number is the number of digits that are correct and are correctly placed and the second number is the number of digits that are correct but are not correctly placed.
                 - if no, then throw exception.
 
-use "` to warp the text in the decision making diagram.
-example: |maybe| E["`A text that needs to be wrapped to another line`"];
-  
-  <div style="height: 300px; overflow: auto; font-size: 1.2em;">
+use <pre>  to warp the text in the decision making diagram.
+example: |maybe| E[<pre> A text that needs to be wrapped to another line </pre>  ];
 
-  <div style="max-height: 300px; overflow: auto; white-space: nowrap;">
 -->
+
 
 ```mermaid
         graph TD;
 
-        A[Is the first word a number written in words?] -->|yes| B["`Replace the word with the number`"];
-        C -->|yes| D["`Need to make sure if nothing is correct.`"];
-        C -->|no| E["`Keep going.`"];
-        B --> F["`Is the first word 'Nothing'?`"];
+        A[Is the first word a number written in words?] -->|yes| B[<pre> Replace the word with the number </pre>  ];
+        C -->|yes| D[<pre> Need to make sure if nothing is correct. </pre>  ];
+        C -->|no| E[<pre> Keep going. </pre>  ];
+        B --> F[<pre> Is the first word 'Nothing'? </pre>  ];
 
-        F -->|yes| G["`Skip to step 3.5.`"];
+        F -->|yes| G[<pre> Skip to step 3.5. </pre>  ];
         F -->|no| H[Skip to step 4.];
-        G --> I["`Is it all correct or all incorrect?`"];
-        I -->|yes| J["`Go to step 4.`"];
-        I -->|no| K["`Go to step 4.`"];
-        H --> L["`Is the second word 'but' or 'except'?`"];
-        L -->|yes| M["`Go to step 5.`"];
-        L -->|no| N["`Go to step 6.`"];
-        M --> O["`Is the third word a number written in words?`"];
-        O -->|yes| P["`We will use the number of digits in the combo - the number in the third word as the number of digits in the combination, and then they will either be all correct or all incorrect.`"];
-        O -->|no| Q["`Skip to step 5.5`"];
-        Q --> R["`Output - problems and attempt to use step 6.`"];
-        N --> S["`How many numbers are in the message?`"];
-        S -->|3| T["`Find max number`"];
-        T --> U["`Is the max number at index 0?`"];
-        U -->|yes| V["`Is it the first number that appears in the message?`"];
-        V -->|yes| W["`Print that the number is not at index 0 but it's the first number that appears in the message. -- no throw exception yet`"];
-        V -->|no| X["`Print that the number is not at index 0 and it's not the first number that appears in the message. -- no throw exception yet`"];
-        U -->|no| Y["`Skip to step 6.5`"];
-        Y --> Z["`Output - problems and attempt to use step 6.`"];
-        S -->|2| AA["`Find max number`"];
-        AA --> AB["`Is the max number at index 0?`"];
-        AB -->|yes| AC["`Is it the first number that appears in the message?`"];
-        AC -->|yes| AD["`Print that the number is not at index 0 but it's the first number that appears in the message. -- no throw exception yet`"];
-        AC -->|no| AE["`Print that the number is not at index 0 and it's not the first number that appears in the message. -- no throw exception yet`"];
-        AB -->|no| AF["`Skip to step 6.5`"];
-        AF --> AG["`Output - problems and attempt to use step 6.`"];
-        S -->|1| AH["`Find max number`"];
-        AH --> AI["`Is the max number at index 0?`"];
-        AI -->|yes| AJ["`Is it the first number that appears in the message?`"];
-        AJ -->|yes| AK["`Print that the number is not at index 0 but it's the first number that appears in the message. -- no throw exception yet`"];
-        AJ -->|no| AL["`Print that the number is not at index 0 and it's not the first number that appears in the message. -- no throw exception yet`"];
-        AI -->|no| AM["`Skip to step 6.5`"];
-        AM --> AN["`Output - problems and attempt to use step 6.`"];
+        G --> I[<pre> Is it all correct or all incorrect? </pre>  ];
+        I -->|yes| J[<pre> Go to step 4. </pre>  ];
+        I -->|no| K[<pre> Go to step 4. </pre>  ];
+        H --> L[<pre> Is the second word 'but' or 'except'? </pre>  ];
+        L -->|yes| M[<pre> Go to step 5. </pre>  ];
+        L -->|no| N[<pre> Go to step 6. </pre>  ];
+        M --> O[<pre> Is the third word a number written in words? </pre>  ];
+        O -->|yes| P[<pre> We will use the number of digits in the combo - the number in the third word as the number of digits in the combination, and then they will either be all correct or all incorrect. </pre>  ];
+        O -->|no| Q[<pre> Skip to step 5.5 </pre>  ];
+        Q --> R[<pre> Output - problems and attempt to use step 6. </pre>  ];
+        N --> S[<pre> How many numbers are in the message? </pre>  ];
+        S -->|3| T[<pre> Find max number </pre>  ];
+        T --> U[<pre> Is the max number at index 0? </pre>  ];
+        U -->|yes| V[<pre> Is it the first number that appears in the message? </pre>  ];
+        V -->|yes| W[<pre> Print that the number is not at index 0 but it's the first number that appears in the message. -- no throw exception yet </pre>  ];
+        V -->|no| X[<pre> Print that the number is not at index 0 and it's not the first number that appears in the message. -- no throw exception yet </pre>  ];
+        U -->|no| Y[<pre> Skip to step 6.5 </pre>  ];
+        Y --> Z[<pre> Output - problems and attempt to use step 6. </pre>  ];
+        S -->|2| AA[<pre> Find max number </pre>  ];
+        AA --> AB[<pre> Is the max number at index 0? </pre>  ];
+        AB -->|yes| AC[<pre> Is it the first number that appears in the message? </pre>  ];
+        AC -->|yes| AD[<pre> Print that the number is not at index 0 but it's the first number that appears in the message. -- no throw exception yet </pre>  ];
+        AC -->|no| AE[<pre> Print that the number is not at index 0 and it's not the first number that appears in the message. -- no throw exception yet </pre>  ];
+        AB -->|no| AF[<pre> Skip to step 6.5 </pre>  ];
+        AF --> AG[<pre> Output - problems and attempt to use step 6. </pre>  ];
+        S -->|1| AH[<pre> Find max number </pre>  ];
+        AH --> AI[<pre> Is the max number at index 0? </pre>  ];
+        AI -->|yes| AJ[<pre> Is it the first number that appears in the message? </pre>  ];
+        AJ -->|yes| AK[<pre> Print that the number is not at index 0 but it's the first number that appears in the message. -- no throw exception yet </pre>  ];
+        AJ -->|no| AL[<pre> Print that the number is not at index 0 and it's not the first number that appears in the message. -- no throw exception yet </pre>  ];
+        AI -->|no| AM[<pre> Skip to step 6.5 </pre>  ];
+        AM --> AN[<pre> Output - problems and attempt to use step 6. </pre>  ];
 ```
-      
-
