@@ -72,7 +72,8 @@ example: |maybe| E[<pre> A text that needs to be wrapped to another line </pre> 
 
         F -->|yes| G[<pre> Skip to step 3.5. </pre>  ];
         F -->|no| H[Skip to step 4.];
-        G --> I[<pre> Is it all correct or all incorrect? </pre>  ];
+        G --> I[<pre> Is it all
+        correct or all incorrect? </pre>  ];
         I -->|yes| J[<pre> Go to step 4. </pre>  ];
         I -->|no| K[<pre> Go to step 4. </pre>  ];
         H --> L[<pre> Is the second word 'but' or 'except'? </pre>  ];
