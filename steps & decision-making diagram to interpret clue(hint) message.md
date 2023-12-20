@@ -106,4 +106,9 @@ example: |maybe| E[<pre> A text that needs to be wrapped to another line </pre> 
         AM --> AN[<pre> Output - problems and attempt to use step 6. </pre>  ];
 ```
 
-
+<!-- to make sure text is warpped in github, need to change the font size to 0.5em -->
+<style>
+    .mermaid {
+        font-size: 0.5em;
+    }
+</style>
