@@ -23,6 +23,7 @@ public class Util {
     private static final String WORD_TO_DIGIT_MAPPINGS_FILE_PATH = "src" + File.separator + "main" + File.separator + "resources" + File.separator + "word-to-digit.json";
     private static Map<String, String> wordToDigitMap = readMappingsFromJsonFile();
 
+    
 
     public static String convertNumbersToDigits(String input) {
         // read the word-to-digit.json file

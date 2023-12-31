@@ -97,7 +97,7 @@ public class createClueObjectFromText {
 
         public void createClueObjectFromText(String clueString) {
             
-        // if first character of clueString is a space, remove it
+            // if first character of clueString is a space, remove it
         if (clueString.charAt(0) == ' ') {
             clueString = clueString.substring(1);
         }
@@ -124,6 +124,7 @@ public class createClueObjectFromText {
             }
         }
 
+        
 
         
 
