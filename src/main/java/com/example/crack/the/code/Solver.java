@@ -402,39 +402,72 @@ public class Solver {
 
       
 
-    private void removeConflictingCases() {
-        // check if there is any conflicting cases
-        // conflicting case is when there are 2 clues with the a number that is the same for both indexes and in one clue the number is correct and well placed and in the other clue the number is correct but wrongly placed
+    private void removeContradictingCases() {
+        /*
+         * contradictions:
+         * 
+         * example of senerio - given the 2 following clues:
+            - 1 2 3 - one number is correct and well placed
+            - 4 5 3 - one number is correct but wrongly placed
+
+            - we can say that the number 3 is wrong and wont be on the code ( at all indexs) because 
+            it cant be correct and well placed and correct but wrongly placed at the same time. (it contradicts itself)
+
+         */
+
+        
+            
+        // loop through and look for clues and/or digits that we are 100% sure about the correctness of thier placement
+        // and then check for contradictions - if it's present at the same index in another clue and it's not well placed then it's not in the code
+
+        // loop trougth the clues
         for (int i = 0; i < clues.size(); i++) {
-            Clue clue1 = clues.get(i);
-            for (int j = i + 1; j < clues.size(); j++) {
-                
-                Clue clue2 = clues.get(j);
+            Clue clue = clues.get(i);
+            
+            // check if we know for sure if the number is well placed or not
+            if(((clue.getWellPlacedDigits() == clue.getCorrectDigits()) || (clue.getIncorrectlyPlacedDigits() == clue.getCorrectDigits())) && clue.getCorrectDigits() > 0){
+                // loop trougth the numbers in the clue
+                for (int j = 0; j < clue.getCombination().size(); j++) {
+                    // check if the number is not null
+                    if(clue.getCombination().get(j) != null){
 
-                // check if the clues have the same number in the same index
-                for (int k = 0; k < clue1.getCombination().size(); k++) {
-                    if (clue1.getCombination().get(k) != null && clue2.getCombination().get(k) != null && clue1.getCombination().get(k) == clue2.getCombination().get(k)) {
-                        // check if the number is correct and well placed in one clue and correct but wrongly placed in the other clue
-                        if (clue1.getWellPlacedDigits() > 0 && clue2.getIncorrectlyPlacedDigits() > 0 && clue1.getIncorrectlyPlacedDigits() == 0 && clue2.getWellPlacedDigits() == 0) {
-                            // if the number is not in the banned list then add it to the banned list
-                            if (!bannedList.contains(clue1.getCombination().get(k))) {
-                                bannedList.add(clue1.getCombination().get(k));
+                    Integer number = clue.getCombination().get(j);
+
+                    boolean isCorrectlyPlaced = clue.getWellPlacedDigits() > 0;
+
+
+
+                    // look if the number is in the same index in another clue
+                    for (int k = 0; k < clues.size(); k++) {
+                        if(k != i){
+                            Clue otherClue = clues.get(k);
+                            // check if the number is in the same index in the other clue
+                            if(otherClue.getCombination().get(j) != null && otherClue.getCombination().get(j) == number){
+                               // make sure the correctness aspect is the opposite for the other clue
+                               boolean isCorrectlyPlacedOtherClue = otherClue.getWellPlacedDigits() > 0;
+
+                                 if(isCorrectlyPlaced != isCorrectlyPlacedOtherClue){
+                                      // if the number is not in the banned list then add it to the banned list
+                                      if(!bannedList.contains(number)){
+                                        bannedList.add(number);
+                                      }
+                                 }
+
                             }
-                    
-                            // not needed to update the correct digits and well placed digits since we know that those numbers are not in the code (incorrectly numbers
-
-                                                    
-                          //  clue1.getCombinationObject().numNotNull--;
-                          //  clue2.getCombinationObject().numNotNull--;
-
                         }
                     }
+                }
                 }
             }
         }
 
-        //call removeBannedNumbers to remove the numbers that are in the banned list
+        // remove the banned numbers
         removeBannedNumbers();
+
+        // TODO: check if the code is solvedCode
+        // TODO: include explenations as for why a certain combination is not valid
+                    
+
 
     }
 
