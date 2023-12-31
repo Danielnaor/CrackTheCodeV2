@@ -218,8 +218,8 @@ public class Solver {
         }
 
 
-        removeConflictingCases();
-
+        //removeConflictingCases();
+        removeContradictingCases();
         
         
         // print the unknown numbers

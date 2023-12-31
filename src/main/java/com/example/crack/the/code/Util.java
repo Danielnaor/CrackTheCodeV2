@@ -7,8 +7,11 @@ package com.example.crack.the.code;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Array;
+import java.nio.channels.FileChannel.MapMode;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Logger;
 
@@ -20,14 +23,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  */
 public class Util {
 
-   /// private static final String MAPPINGS_FILE_PATH = "src" + File.separator + "main" + File.separator + "resources" + File.separator + "word-to-digit.json";
     private static final String WORD_TO_DIGIT_MAPPINGS_FILE_PATH = "src" + File.separator + "main" + File.separator + "resources" + File.separator + "word-to-digit.json";
     private static Map<String, String> wordToDigitMap = readMappingsFromJsonFile();
 
     private static Logger logger;
 
-    private Util() {
-    }
+    
 
     Util(Logger logger) {
         this.logger = logger;
@@ -35,7 +36,109 @@ public class Util {
     }
     
     // returns a list with the index and the digit
+    // every entry in the list has both the index and the digit
+    public static Map<Integer, ArrayList<Integer>> getDigits(String input) {
+        // read the word-to-digit.json file
+
+        if (input == null || input.length() == 0) {
+            logger.severe("Error: input is null or empty");
+            
+            // print to logger who called this metho (the method and line that called this method)
+            StackTraceElement[] stackTraceElements = Thread.currentThread().getStackTrace();
+            StackTraceElement stackTraceElement = stackTraceElements[2];
+            logger.severe("Error: " + stackTraceElement.getClassName() + " " + stackTraceElement.getMethodName() + " " + stackTraceElement.getLineNumber());
+
+
+
+        }
+
+
+        // key = digit, value = indexs
+        Map<Integer, ArrayList<Integer>> digitToIndexMap = new HashMap<>();
+
+        // check if any digits are in the input
+        char[] inputChars = input.toCharArray();
+        for(char c: inputChars){
+            if(Character.isDigit(c)){
+                // if the digit is already in the map, add the index to the arraylist
+                if(digitToIndexMap.containsKey(Character.getNumericValue(c))){
+                    digitToIndexMap.get(Character.getNumericValue(c)).add(input.indexOf(c));
+                } else {
+                    // if the digit is not in the map, create a new arraylist and add the index to it
+                    ArrayList<Integer> indexs = new ArrayList<>();
+                    indexs.add(input.indexOf(c));
+                    digitToIndexMap.put(Character.getNumericValue(c), indexs);
+                }
+            }
+        }
+
+        // if any digits are found and there is digits as words as well 
+        if (digitToIndexMap.size() > 0 && hasDigitsAsWords(input)) {
+            //logger.warn("Warning: there are digits as words and digits as numbers in the input");
+            logger.warning("Warning: there are digits as words and digits as numbers in the input");
+            
+        }
+        
+        if (hasDigitsAsWords(input)) {
+            //logger.info("Info: there are digits as words in the input");
+            logger.info("Info: there are digits as words in the input");
+            input = convertNumbersToDigits(input);
+
+            // update the digitToIndexMap
+            digitToIndexMap = new HashMap<>();
+            inputChars = input.toCharArray();
+            for(char c: inputChars){
+                if(Character.isDigit(c)){
+                    // if the digit is already in the map, add the index to the arraylist
+                    if(digitToIndexMap.containsKey(Character.getNumericValue(c))){
+                        digitToIndexMap.get(Character.getNumericValue(c)).add(input.indexOf(c));
+                    } else {
+                        // if the digit is not in the map, create a new arraylist and add the index to it
+                        ArrayList<Integer> indexs = new ArrayList<>();
+                        indexs.add(input.indexOf(c));
+                        digitToIndexMap.put(Character.getNumericValue(c), indexs);
+                    }
+                }
+            }
+            
+            if (digitToIndexMap.size() == 0) {
+                logger.severe("Error: there are no digits in the input and returned true for hasDigitsAsWords");
+            }
+
+
+
+
+        }
+
+
+
+       
+        // key = digit, value = indexs
+        
+
+
+
+
+        
+
+        return digitToIndexMap;
+    }
     
+
+    // true if it has digits written as words 
+    public static boolean hasDigitsAsWords(String input) {
+        // read the word-to-digit.json file
+        String[] words = input.split(" ");
+
+        // Iterate over the words and check if any of them are digits
+        for (String word : words) {
+            if (wordToDigitMap.containsKey(word)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
 
 
     public static String convertNumbersToDigits(String input) {
