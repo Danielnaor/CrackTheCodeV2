@@ -3,8 +3,7 @@ package com.example.crack.the.code;
 import java.util.List;
 
 public class Clue {
-   // private static Combination combination;
-   private  Combination combination;
+    private  Combination combination;
     private String hintMessage;
     private int correctDigits;
     private int wellPlacedDigits;
@@ -20,9 +19,6 @@ public class Clue {
         this.incorrectlyPlacedDigits = incorrectlyPlacedDigits;
     }
 
-
-
-
     // builder pattern
     public Clue(Builder builder){
         this.combination = builder.combination;
@@ -32,6 +28,54 @@ public class Clue {
         this.incorrectlyPlacedDigits = builder.incorrectlyPlacedDigits;
     }
 
+
+     // builder pattern
+     public static class Builder {
+        private Combination combination;
+        private String hintMessage;
+        private int correctDigits;
+        private int wellPlacedDigits;
+        private int incorrectlyPlacedDigits;
+
+        public Builder() {
+        }
+
+        public Builder combination(List<Integer> combination) {
+            this.combination = new Combination(combination);
+            return this;
+        }
+
+        public Builder combination(Combination combination) {
+            this.combination = combination;
+            return this;
+        }
+
+        public Builder hintMessage(String hintMessage) {
+            this.hintMessage = hintMessage;
+            return this;
+        }
+
+        public Builder correctDigits(int correctDigits) {
+            this.correctDigits = correctDigits;
+            return this;
+        }
+
+        public Builder wellPlacedDigits(int wellPlacedDigits) {
+            this.wellPlacedDigits = wellPlacedDigits;
+            return this;
+        }
+
+        public Builder incorrectlyPlacedDigits(int incorrectlyPlacedDigits) {
+            this.incorrectlyPlacedDigits = incorrectlyPlacedDigits;
+            return this;
+        }
+
+        public Clue build() {
+            return new Clue(this);
+        }
+    }
+
+    // getters and setters
     public Combination getCombinationObject() {
         return combination;
     }
@@ -99,49 +143,18 @@ public class Clue {
                 ", Incorrectly Placed: " + incorrectlyPlacedDigits + ")";
     }
 
-    // builder pattern
-    public static class Builder {
-        private Combination combination;
-        private String hintMessage;
-        private int correctDigits;
-        private int wellPlacedDigits;
-        private int incorrectlyPlacedDigits;
-
-        public Builder() {
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null || !(obj instanceof Clue)) {
+            return false;
         }
-
-        public Builder combination(List<Integer> combination) {
-            this.combination = new Combination(combination);
-            return this;
-        }
-
-        public Builder combination(Combination combination) {
-            this.combination = combination;
-            return this;
-        }
-
-        public Builder hintMessage(String hintMessage) {
-            this.hintMessage = hintMessage;
-            return this;
-        }
-
-        public Builder correctDigits(int correctDigits) {
-            this.correctDigits = correctDigits;
-            return this;
-        }
-
-        public Builder wellPlacedDigits(int wellPlacedDigits) {
-            this.wellPlacedDigits = wellPlacedDigits;
-            return this;
-        }
-
-        public Builder incorrectlyPlacedDigits(int incorrectlyPlacedDigits) {
-            this.incorrectlyPlacedDigits = incorrectlyPlacedDigits;
-            return this;
-        }
-
-        public Clue build() {
-            return new Clue(this);
-        }
+        Clue other = (Clue) obj;
+        return combination.equals(other.combination) &&
+                hintMessage.equals(other.hintMessage) &&
+                correctDigits == other.correctDigits &&
+                wellPlacedDigits == other.wellPlacedDigits &&
+                incorrectlyPlacedDigits == other.incorrectlyPlacedDigits;
     }
+
+   
 }

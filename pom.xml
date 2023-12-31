@@ -12,21 +12,18 @@
         <exec.mainClass>com.example.crack.the.code.CrackTheCode</exec.mainClass>
     </properties>
 
-    <build>
-    <plugins>
-        <plugin>
-            <groupId>com.javax0.jamal</groupId>
-            <artifactId>jamal-maven-plugin</artifactId>
-            <version>2.1.0</version>
-            <executions>
-                <execution>
-                    <goals>
-                        <goal>jamalize</goal>
-                    </goals>
-                </execution>
-            </executions>
-        </plugin>
-    </plugins>
-</build>
+    <dependencies>
+       
+        <!-- https://mvnrepository.com/artifact/com.fasterxml.jackson.core/jackson-databind -->
+<dependency>
+    <groupId>com.fasterxml.jackson.core</groupId>
+    <artifactId>jackson-databind</artifactId>
+    <version>2.16.1</version>
+</dependency>
+
+    </dependencies>
+
+
+    
 
 </project>

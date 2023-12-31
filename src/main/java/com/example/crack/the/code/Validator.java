@@ -70,7 +70,7 @@ public class Validator {
     public static class Builder {
         private Integer[] code;
         private List<Clue> clues;
-        private ArrayList<Integer[]> invalidCombinations;
+        private ArrayList<Integer[]> invalidCombinations = new ArrayList<Integer[]>();
         private boolean debug = false;
 
         public Builder code(Integer[] code) {

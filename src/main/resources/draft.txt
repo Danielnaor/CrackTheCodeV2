@@ -1,0 +1,45 @@
+ 
+/* 
+        // a method to check if a combinatuion satisfies a clue
+    private boolean combinationSatisfiesClue(Integer[] combination, Clue clue) {
+        // check if the combination satisfies the clue
+        // check if the number of correct digits is the same as the number of correct digits in the clue
+        int numCorrectDigits = 0;
+        for (int i = 0; i < combination.length; i++) {
+            if (combination[i] != null && clue.getCombination().get(i) != null && combination[i] == clue.getCombination().get(i)) {
+                numCorrectDigits++;
+            }
+        }
+
+        if (numCorrectDigits != clue.getCorrectDigits()) {
+            return false;
+        }
+
+        // check if the number of well placed digits is the same as the number of well placed digits in the clue
+        int numWellPlacedDigits = 0;
+        for (int i = 0; i < combination.length; i++) {
+            if (combination[i] != null && clue.getCombination().get(i) != null && combination[i] == clue.getCombination().get(i) && combination[i] == code[i]) {
+                numWellPlacedDigits++;
+            }
+        }
+
+        if (numWellPlacedDigits != clue.getWellPlacedDigits()) {
+            return false;
+        }
+
+        // check if the number of incorrectly placed digits is the same as the number of incorrectly placed digits in the clue
+        int numIncorrectlyPlacedDigits = 0;
+        for (int i = 0; i < combination.length; i++) {
+            if (combination[i] != null && clue.getCombination().get(i) != null && combination[i] == clue.getCombination().get(i) && combination[i] != code[i]) {
+                numIncorrectlyPlacedDigits++;
+            }
+        }
+
+        if (numIncorrectlyPlacedDigits != clue.getIncorrectlyPlacedDigits()) {
+            return false;
+        }
+
+        return true;
+    }   
+
+    */
