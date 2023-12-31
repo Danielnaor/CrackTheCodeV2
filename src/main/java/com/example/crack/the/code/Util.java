@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Map;
+import java.util.logging.Logger;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -23,7 +24,19 @@ public class Util {
     private static final String WORD_TO_DIGIT_MAPPINGS_FILE_PATH = "src" + File.separator + "main" + File.separator + "resources" + File.separator + "word-to-digit.json";
     private static Map<String, String> wordToDigitMap = readMappingsFromJsonFile();
 
+    private static Logger logger;
+
+    private Util() {
+    }
+
+    Util(Logger logger) {
+        this.logger = logger;
+        
+    }
     
+    // returns a list with the index and the digit
+    
+
 
     public static String convertNumbersToDigits(String input) {
         // read the word-to-digit.json file
@@ -49,11 +62,20 @@ public class Util {
         for (int i = 0; i < wordsList.size(); i++) {
             try{
                 Integer num = Integer.parseInt(wordsList.get(i));
-                
+
                 if(num != null){
                         Integer nextNum = Integer.parseInt(wordsList.get(i+1));
                         if(nextNum != null){
                             Integer sum = num + nextNum;
+                            
+                            // the first 2 word number between 0-1000 will be 20, so if num 1 is less than 20, print a warning
+                            if(num < 20){
+                                System.out.println("Warning: the first number in the combination is less than 20, so the first 2 word numbers will be added together");
+                                //logger.warn("Warning: the first number in the combination is less than 20, so the first 2 word numbers will be added together");
+                                logger.warning("Warning: the first number in the combination is less than 20, so the first 2 word numbers will be added together");
+                            }
+                    
+                    
                             wordsList.remove(i);
                             wordsList.remove(i);
                             wordsList.add(i, sum.toString());

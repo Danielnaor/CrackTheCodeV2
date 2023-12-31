@@ -16,14 +16,17 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Scanner;
-
+import java.util.StringTokenizer;
+import java.util.logging.*;
 
 public class createClueObjectFromText {
+    private static Logger logger = Logger.getLogger(createClueObjectFromText.class.getName());
 
     Boolean all = false;
     Boolean nothing = false;
+    Util util = new Util(logger);
 
-
+    String hintMessage; 
 
 
     /*
@@ -87,29 +90,24 @@ public class createClueObjectFromText {
                     .incorrectlyPlacedDigits(2)
                     .build();
 
-        in order to deal with ones like number 5, we would check the string part and if there is no either of the following words:
-        "all"
-        "nothing"
-        any number (words - one, two, three, four, five, six, seven, eight, nine)
-        then we would use the last numebr of combination as the number of correct digits (regardless of whether it is well placed or not)
+        
+        in order to attempt and deal with probmems like test case 5, we will check and if the first word is number or numbers the digit before it will be part of the hint message
+
+
+
         */
 
 
         public void createClueObjectFromText(String clueString) {
             
-            // if first character of clueString is a space, remove it
-        if (clueString.charAt(0) == ' ') {
-            clueString = clueString.substring(1);
-        }
-
-        // if we are writing numbers as words, we can try to assume that the digits would all be part of the combination.
-        // i think if 3 digits are present written as words, then we can assume that the digits (numbers as digits) would be part of the combination
-
         
 
+       //TODO: if we are writing numbers as words, we can try to assume that the digits would all be part of the combination.
+       // i think if 3 digits are present written as words, then we can assume that the digits (numbers as digits) would be part of the combination
 
 
-     // figure out what is the separator for the combination
+
+        // figure out what is the separator for the combination
         // the separator is all the characters from the first character that is not a number to the character before the next number
         boolean foundFirstNum = false;
         String combinationSeparator = "";
@@ -124,6 +122,45 @@ public class createClueObjectFromText {
             }
         }
 
+
+
+
+        // check if all or nothing is present in the string
+        checkIfAllOrNothing(clueString);
+
+        if (all || nothing) {
+            // if any more number 
+
+            // check if any digts are present in the message
+
+            String comboStrring = "";
+            if (all) {
+                comboStrring = clueString.substring(0, clueString.indexOf("all"));
+            } else if (nothing) {
+                comboStrring = clueString.substring(0, clueString.indexOf("nothing"));
+            }
+            
+            // get all digits from the string
+            ArrayList<Integer> digits = new ArrayList<Integer>();
+
+            for (int i = 0; i < comboStrring.length(); i++) {
+                if (Character.isDigit(comboStrring.charAt(i))) {
+                    digits.add(Integer.parseInt(comboStrring.charAt(i) + ""));
+                }
+            }
+
+            System.out.println("digits: " + digits);
+            
+
+            // need to implement a logic to deal with digits being present in the message that arent equal to the number of digits in the combination
+            // ex - all number are correct, but 2 are well placed
+
+            // becuse didnt implement this logic, check if there is a digit in the message that is not equal to the number of digits in the combination
+            
+
+            
+                
+        } else{
         
 
         
@@ -207,12 +244,12 @@ public class createClueObjectFromText {
         checkIfAllOrNothing(hintMessage);
 
         // if both all and nothing are false, then we will check if any number (words - one, two, three, four, five, six, seven, eight, nine) appears in the hint message
-        if (!all && !nothing) {
-
+        if (!(all || nothing)) {
             
             System.out.println("hintMessage: " + hintMessage);
             // convert all numbers as words to numbers as digits using the Util class.
-            hintMessage = Util.convertNumbersToDigits(hintMessage);
+            
+            hintMessage = util.convertNumbersToDigits(hintMessage);
 
 
             //  how many times a number any number (words - one, two, three, four, five, six, seven, eight, nine) appears in the hint message
@@ -241,7 +278,7 @@ public class createClueObjectFromText {
         }
 
 
-
+    }
 
 
 
@@ -269,10 +306,12 @@ public class createClueObjectFromText {
     // testing 
     public static void main(String[] args) {
         createClueObjectFromText createClueObjectFromText = new createClueObjectFromText();
-        createClueObjectFromText.createClueObjectFromText("9, 2, 8, 5 one number is correct but wrong placed");
-        createClueObjectFromText.createClueObjectFromText("0 1 2 3 One number is correct and well placed");
-        createClueObjectFromText.createClueObjectFromText("1 3 2 0 one number is correct but wrongly placed");
-        
+       // createClueObjectFromText.createClueObjectFromText("9, 2, 8, 5 one number is correct but wrong placed");
+       // createClueObjectFromText.createClueObjectFromText("0 1 2 3 One number is correct and well placed");
+       // createClueObjectFromText.createClueObjectFromText("1 3 2 0 one number is correct but wrongly placed");
+        createClueObjectFromText.createClueObjectFromText("0 0 0 0 nothing is correct");
+
+
         
     }
 
