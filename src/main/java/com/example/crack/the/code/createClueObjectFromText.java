@@ -271,7 +271,9 @@ public class createClueObjectFromText {
         createClueObjectFromText createClueObjectFromText = new createClueObjectFromText();
         createClueObjectFromText.createClueObjectFromText("9, 2, 8, 5 one number is correct but wrong placed");
         createClueObjectFromText.createClueObjectFromText("0 1 2 3 One number is correct and well placed");
-         
+        createClueObjectFromText.createClueObjectFromText("1 3 2 0 one number is correct but wrongly placed");
+        
+        
     }
 
     
