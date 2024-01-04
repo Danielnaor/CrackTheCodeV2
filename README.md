@@ -3,7 +3,7 @@ The project will be able to generate Crack the Code puzzles.
 The project will also be have a Solver that can solve Crack the Code puzzles.
 -->
 
-# Crack the Code
+# Crack the Code - High level plan (old)
 
 ## What is Crack the Code?
 
