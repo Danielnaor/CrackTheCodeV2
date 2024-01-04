@@ -304,7 +304,7 @@ public class Generator {
                 }
 
                 // add the digit to the incorrectDigits list
-                incorrectDigitsList[i] = incorrectNumbers.toArray(new Integer[incorrectNumbers.size()])[random];
+                incorrectDigitsList[i] = digit;
             }
             }
         }
