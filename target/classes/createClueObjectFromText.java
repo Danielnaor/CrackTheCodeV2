@@ -99,7 +99,8 @@ public class createClueObjectFromText {
     public Clue createClueObjectFromText(String clueString) {
 
         if (clueString == null || clueString.isEmpty()) {
-            return;
+         //   return;
+         return null;
         }
 
         clueString = clueString.toLowerCase();
@@ -424,6 +425,7 @@ public class createClueObjectFromText {
             }
 
         }
+        return null;
 
     }
 

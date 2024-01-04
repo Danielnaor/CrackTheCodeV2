@@ -5,6 +5,7 @@
 
 package com.example.crack.the.code;
 
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -26,6 +27,7 @@ public class Riddle {
     // the clues
     private List<Clue> clues;
 
+    
 
     public Riddle() {
     }
@@ -99,6 +101,51 @@ public class Riddle {
         return "Riddle{" + "code=" + code + ", clues=" + clues + '}';
     }
 
+    /**
+         * Will return if the riddle could be solved using the clues (will attempt to solve using the Solver class) 
+         * Will only return true if the riddle could be solved using the clues and the Solver class solved it correctly
+         * @return 
+         */
+    public boolean isSolvable() {
+        Solver solver = new Solver(clues);
+        
+        // boolean - stores whether the Solver class was able to solve for any code (regadless if solved correctly) - name should be more specific then isSolved
+        boolean SolverHasSolved = solver.isSolved();
+
+        // if the Solver class was able to solve for any code check whether it solved correctly
+        if (SolverHasSolved) {
+            // the code the solver was able to solve for
+            Integer[] solverCode = solver.getCode();
+
+            // check if the code the solver solved for is the same as the code of the riddle
+            if (Arrays.equals(solverCode, code)) {
+                // verify that the code is valid with clues using the validatior 
+                Validator validator = new Validator.Builder()
+                        .code(code)
+                        .clues(clues)
+                        .build();
+
+                    //   validator.isCodeValid(); 
+                    boolean isCodeValid = validator.isCodeValid(code);
+
+                    if(isCodeValid){
+                        return true;
+                    } else{
+                        // throw new IllegalStateException
+                        throw new IllegalStateException("The code is not valid with the clues");
+                    }
+                
+            } else {
+                // false and issue a warning
+                System.out.println("Warning: the Solver class was able to solve for a code but it was not the correct code");
+                // print reminder to change this to logger  with file and line
+                System.out.println("Reminder: change this to logger (printed by: riddle.java" + System.out.getClass().getName() + " line: " + Thread.currentThread().getStackTrace()[1].getLineNumber() + ")");
+                return false;
+            }
+        } else{
+            return false;
+        }
+    }
 
 
 

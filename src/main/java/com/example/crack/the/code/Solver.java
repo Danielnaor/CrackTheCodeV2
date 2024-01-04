@@ -54,8 +54,8 @@ public class Solver {
     // the clues
     private List<Clue> clues;
 
-    // a boolean to indicate if the code was solvedCode
-    private boolean solvedCode;
+    // a boolean to indicate if the code was 
+    private boolean solved; 
 
     // banned list - will store the numbers that are eliminated from all indexes
     private List<Integer> bannedList;
@@ -87,7 +87,7 @@ public class Solver {
             this.clues.add(clue.clone());
         }
 
-        this.solvedCode = false;
+        this.solved = false;
 
         Integer codeLength = 0;
         if  (!clues.isEmpty()) {
@@ -136,7 +136,7 @@ public class Solver {
         
         
         if (isSolved()) {
-            solvedCode = true;
+            solved = true;
             return code;
         }
         
@@ -171,7 +171,7 @@ public class Solver {
         // check if there is the code is solvedCode and/or if any clue is solvedCode
         // check if we solvedCode the code
         if (isSolved()) {
-            solvedCode = true;
+            solved = true;
             return code;
         }
 
@@ -228,7 +228,7 @@ public class Solver {
         }
     
          if (isSolved()) {
-            solvedCode = true;
+            solved = true;
             return code;
         }
 
@@ -307,7 +307,7 @@ public class Solver {
 
 
         if(isSolved()){
-            solvedCode = true;
+            solved = true;
             return code;
         }
         
@@ -735,13 +735,10 @@ public class Solver {
         
     }
 
-    private boolean isSolved() {
+    // a different, better name for this method, that checks if the code, of the riddle, which is the thing that we want to solve for is "isSolvedCode"
+    boolean isSolved() {
 
-    
-
-
-
-
+        
 
         // if the possible combinations is 1 then the code is solvedCode
         if ( possibleCombinations != null && possibleCombinations.size() == 1) {
@@ -1282,9 +1279,14 @@ public class Solver {
         }
     }
 
-    //get solvedCode
-    public boolean isSolvedCode() {
-        return solvedCode;
+    //get solved
+    public boolean getSolved() {
+        return solved;
+    }
+
+    // get code
+    public Integer[] getCode() {
+        return code;
     }
 
 

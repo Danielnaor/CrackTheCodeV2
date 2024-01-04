@@ -29,7 +29,11 @@ public class Validator {
     private Integer[] code;
     private List<Clue> clues;
     private ArrayList<Integer[]> invalidCombinations;
-    private boolean debug = false;
+    private boolean debug = true;
+
+   
+    
+
 
     // store the debug messages 
     public ArrayList<String> debugMessages = new ArrayList<String>();
@@ -37,6 +41,8 @@ public class Validator {
 
     // empty constructor
     public Validator() {
+
+        invalidCombinations = new ArrayList<Integer[]>();
 
 
 
@@ -54,6 +60,8 @@ public class Validator {
         this.code = code;
         this.clues = clues;
         this.invalidCombinations = invalidCombinations;
+
+
         }
 
     // builder pattern
@@ -61,6 +69,7 @@ public class Validator {
         this.code = builder.code;
         this.clues = builder.clues;
         this.invalidCombinations = builder.invalidCombinations;
+
         this.debug = builder.debug;
     }
 
@@ -102,6 +111,29 @@ public class Validator {
     public boolean checkIfCombinationValid(Integer[] combination) {
         for (Clue clue : clues) {
             if (!checkIfComboValid(combination, clue)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+
+    // return true if the code found is valid with all clues
+    public boolean isCodeValid(Integer[] codeFound) {
+        for (Clue clue : clues) {
+            if (!checkIfCombinationValid(codeFound)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+
+     public boolean isCodeValid() {
+        for (Clue clue : clues) {
+            if (!checkIfCombinationValid(code)) {
                 return false;
             }
         }
@@ -161,6 +193,12 @@ public class Validator {
 
         // check if the combination satisfies one clue - the placement of the digit does not matter
     public boolean checkIfCombinationSatisfiesClue(Integer[] combination, Clue clue) {
+
+
+
+
+
+
             int numCorrectDigits = 0;
             for (int i = 0; i < clue.getCombination().size(); i++) {
                 // only check if the number is correct we dont care if it is well placed or not
@@ -213,19 +251,38 @@ public class Validator {
         int numCorrectDigitsWellPlaced = 0;
         int numCorrectDigitsIncorrectlyPlaced = 0;
 
+        // in case invalid combination should add a debugging message:
+         /* 
+    String - whats wrong with the combination: - print if statement and the class name and line number
+    the expected value of correctDigits, wellPlacedDigits, incorrectlyPlacedDigits 
+    the actual value of correctDigits, wellPlacedDigits, incorrectlyPlacedDigits
+    the combination
+
+
+    */
+
 
         for (int i = 0; i < clue.getCombination().size(); i++) {
-            // only check if the number is correct we dont care if it is well placed or not
+            //  check if the number is correct (for now not checking if it is well placed or not) if it is then increment the number of correct digits
+
+
+
+
             if (clue.getCombination().get(i) != null && Arrays.asList(combination).contains(clue.getCombination().get(i))) {
-                numCorrectDigits++;
+                numCorrectDigits++; // number of digits that are correct for this combination
 
                 // check if the number is well placed
-                if (clue.getCombination().get(i) == combination[i]) {
+                if (clue.getCombination().get(i) == combination[i]) {  // if so print both
+                    System.out.println("clue.getCombination().get(i): " + clue.getCombination().get(i) + " combination[i]: " + combination[i] + "line: " + Thread.currentThread().getStackTrace()[1].getLineNumber());
                     numCorrectDigitsWellPlaced++;
                 } else {
                     numCorrectDigitsIncorrectlyPlaced++;
                 }
             }
+
+
+        
+            
 
             // if the numbers correct digits is greater than the number of correct digits of the clue then return false
             if (numCorrectDigits > clue.getCorrectDigits()) {
@@ -234,25 +291,64 @@ public class Validator {
 
                 // in this case the combination has more correct digits than the clue so it is not a valid combination so we will add it to the invalid combinations list
                 invalidCombinations.add(combination);
+
+                 
+
+                String debugMessage = "numCorrectDigits > clue.getCorrectDigits + class: " + this.getClass().getName() + "\t line: " + Thread.currentThread().getStackTrace()[1].getLineNumber() 
+                + "\n" + "Expected - correctDigits: " + clue.getCorrectDigits() + " wellPlacedDigits: " + clue.getWellPlacedDigits() + " incorrectlyPlacedDigits: " + clue.getIncorrectlyPlacedDigits()
+                + "\n" + "Actual - correctDigits: " + numCorrectDigits + " wellPlacedDigits: " + numCorrectDigitsWellPlaced + " incorrectlyPlacedDigits: " + numCorrectDigitsIncorrectlyPlaced;
+
+                debugMessages.add(debugMessage);
+
+            if(debug)
+                    System.out.println(debugMessage);
+
+
+
                 return false;
             }
 
             if (numCorrectDigitsWellPlaced > clue.getWellPlacedDigits()) {
                 // in this case the combination has more correct digits that are well placed than the clue so it is not a valid combination so we will add it to the invalid combinations list
                 // print combo and clue and numCorrectDigitsWellPlaced and clue.getWellPlacedDigits()
-         //       System.out.println("combo: " + Arrays.toString(combination) + " clue: " + clue.getCombination().toString() + " numCorrectDigitsWellPlaced(combo): " + numCorrectDigitsWellPlaced + " wellPlacedDigits: " + clue.getWellPlacedDigits());
+               //System.out.println("combo: " + Arrays.toString(combination) + " clue: " + clue.getCombination().toString() + " numCorrectDigitsWellPlaced(combo): " + numCorrectDigitsWellPlaced + " wellPlacedDigits: " + clue.getWellPlacedDigits());
                 
                
          invalidCombinations.add(combination);
+
+                
+                String debugMessage = "numCorrectDigitsWellPlaced > clue.getWellPlacedDigits + class: " + this.getClass().getName() + "\t line: " + Thread.currentThread().getStackTrace()[1].getLineNumber() 
+                + "\n" + "Expected - correctDigits: " + clue.getCorrectDigits() + " wellPlacedDigits: " + clue.getWellPlacedDigits() + " incorrectlyPlacedDigits: " + clue.getIncorrectlyPlacedDigits()
+                + "\n" + "Actual - correctDigits: " + numCorrectDigits + " wellPlacedDigits: " + numCorrectDigitsWellPlaced + " incorrectlyPlacedDigits: " + numCorrectDigitsIncorrectlyPlaced;
+
+                debugMessages.add(debugMessage);
+
+                if(debug)
+                    System.out.println(debugMessage);
+
+
                 return false;
             }
 
             if (numCorrectDigitsIncorrectlyPlaced > clue.getIncorrectlyPlacedDigits()) {
                 // in this case the combination has more correct digits that are incorrectly placed than the clue so it is not a valid combination so we will add it to the invalid combinations list
                 // print combo and clue and numCorrectDigitsIncorrectlyPlaced and clue.getIncorrectlyPlacedDigits()
- //               System.out.println("combo: " + Arrays.toString(combination) + " clue: " + clue.getCombination().toString() + " numCorrectDigitsIncorrectlyPlaced(combo): " + numCorrectDigitsIncorrectlyPlaced + " incorrectlyPlacedDigits: " + clue.getIncorrectlyPlacedDigits());
+             //  System.out.println("combo: " + Arrays.toString(combination) + " clue: " + clue.getCombination().toString() + " numCorrectDigitsIncorrectlyPlaced(combo): " + numCorrectDigitsIncorrectlyPlaced + " incorrectlyPlacedDigits: " + clue.getIncorrectlyPlacedDigits());
                 
                 invalidCombinations.add(combination);
+
+
+                String debugMessage = "numCorrectDigitsIncorrectlyPlaced > clue.getIncorrectlyPlacedDigits + class: " + this.getClass().getName() + "\t line: " + Thread.currentThread().getStackTrace()[1].getLineNumber()
+                + "\n" + "Expected - correctDigits: " + clue.getCorrectDigits() + " wellPlacedDigits: " + clue.getWellPlacedDigits() + " incorrectlyPlacedDigits: " + clue.getIncorrectlyPlacedDigits()
+                + "\n" + "Actual - correctDigits: " + numCorrectDigits + " wellPlacedDigits: " + numCorrectDigitsWellPlaced + " incorrectlyPlacedDigits: " + numCorrectDigitsIncorrectlyPlaced;
+
+                debugMessages.add(debugMessage);
+
+
+
+                if(debug)
+                    System.out.println(debugMessage);
+
                 return false;
             }
 
@@ -278,6 +374,9 @@ public class Validator {
         
 
         if (numCorrectDigits != clue.getCorrectDigits() || numCorrectDigitsWellPlaced != clue.getWellPlacedDigits() || numCorrectDigitsIncorrectlyPlaced != clue.getIncorrectlyPlacedDigits()) {
+
+
+
             return false;
         }
 

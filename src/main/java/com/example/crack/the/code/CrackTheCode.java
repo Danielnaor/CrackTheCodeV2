@@ -16,6 +16,35 @@ public class CrackTheCode {
     static boolean passedAllTests = true;
 
     public static void main(String[] args) throws IOException {
+
+        // testing the Generator
+        Generator generator = new Generator.Builder()
+                .lengthOfCode(3)
+                .maxNumberOfClues(6)
+                .repeatDigits(false)
+                                .build();
+
+        // use the generator (Object of the Generator class) to call the method that generates the entire Riddle
+        Riddle riddle = generator.generateRiddle();
+
+        // print the clues, isSolve and print the code
+        System.out.println("Clues: ");
+        for (Clue clue : riddle.getClues()) {
+            System.out.println(clue);
+        }
+        
+        // print if it's possible to solve the riddle 
+        System.out.println("Is solvable: " + riddle.isSolvable());
+        
+
+    }
+
+
+    public static void testSolver() throws IOException {
+
+        // initialize solver
+        
+
         ArrayList<Clue> clues = new ArrayList<>();
 
         
