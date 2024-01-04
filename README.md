@@ -15,9 +15,11 @@ Earlier versions:
 - [CrackTheCodeV1](https://github.com/Danielnaor/CrackTheCodeV1)
 
 
-## Note for Version 2
-If you're exploring Version 2, here's the scoop:
-- **Solver Module:** Highly functional, very little can be done to improve the amount of possibilities eliminated using it. 
+## Note on the functionality of Version 2 
+- **Solver Module:** Highly functional module, was improved and much more effective than in V1, very little can be done to improve the amount of possibilities eliminated using it. 
 - **Generator Module:** Not 100% functional. It does its job for the most part, but the Validator module disrupts its work. A more polished experience is planned in the upcoming Version 3.
 - **Validator Module:** Currently has some issues - not functional. Version 3 will recreate it with improvements for a better experience.
+
+## Contributions
+- [Daniel Naor](https://github.com/Danielnaor)
 
