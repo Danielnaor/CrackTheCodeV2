@@ -58,16 +58,33 @@ public class Util {
 
         // check if any digits are in the input
         char[] inputChars = input.toCharArray();
-        for(char c: inputChars){
+        for(int i = 0; i < inputChars.length; i++){
+            char c = inputChars[i];
             if(Character.isDigit(c)){
+
+                String number = c + "";
+                // if the next characters are also digits, then we have a number with more than 1 digit
+                for(int j = i+1; j < inputChars.length; j++){
+                    char nextChar = inputChars[j];
+                    if(Character.isDigit(nextChar)){
+                        number += nextChar;
+                        i++;
+                    } else {
+                        break;
+                    }
+                }
+
+                
+
+
                 // if the digit is already in the map, add the index to the arraylist
-                if(digitToIndexMap.containsKey(Character.getNumericValue(c))){
-                    digitToIndexMap.get(Character.getNumericValue(c)).add(input.indexOf(c));
+                if(digitToIndexMap.containsKey(Integer.parseInt(number))){
+                    digitToIndexMap.get(Integer.parseInt(number)).add(input.indexOf(number));
                 } else {
                     // if the digit is not in the map, create a new arraylist and add the index to it
                     ArrayList<Integer> indexs = new ArrayList<>();
-                    indexs.add(input.indexOf(c));
-                    digitToIndexMap.put(Character.getNumericValue(c), indexs);
+                    indexs.add(input.indexOf(number));
+                    digitToIndexMap.put(Integer.parseInt(number), indexs);
                 }
             }
         }
@@ -87,7 +104,7 @@ public class Util {
             // update the digitToIndexMap
             digitToIndexMap = new HashMap<>();
             inputChars = input.toCharArray();
-            for(char c: inputChars){
+            /*for(char c: inputChars){
                 if(Character.isDigit(c)){
                     // if the digit is already in the map, add the index to the arraylist
                     if(digitToIndexMap.containsKey(Character.getNumericValue(c))){
@@ -99,8 +116,40 @@ public class Util {
                         digitToIndexMap.put(Character.getNumericValue(c), indexs);
                     }
                 }
-            }
+            } */
             
+
+            for(int i = 0; i < inputChars.length; i++){
+                char c = inputChars[i];
+                if(Character.isDigit(c)){
+
+                    String number = c + "";
+                    // if the next characters are also digits, then we have a number with more than 1 digit
+                    for(int j = i+1; j < inputChars.length; j++){
+                        char nextChar = inputChars[j];
+                        if(Character.isDigit(nextChar)){
+                            number += nextChar;
+                            i++;
+                        } else {
+                            break;
+                        }
+                    }
+
+                    // if the digit is already in the map, add the index to the arraylist
+                    if(digitToIndexMap.containsKey(Integer.parseInt(number))){
+                        digitToIndexMap.get(Integer.parseInt(number)).add(input.indexOf(number));
+                    } else {
+                        // if the digit is not in the map, create a new arraylist and add the index to it
+                        ArrayList<Integer> indexs = new ArrayList<>();
+                        indexs.add(input.indexOf(number));
+                        digitToIndexMap.put(Integer.parseInt(number), indexs);
+                    }
+                }
+            }
+
+
+
+
             if (digitToIndexMap.size() == 0) {
                 logger.severe("Error: there are no digits in the input and returned true for hasDigitsAsWords");
             }
@@ -215,5 +264,45 @@ public class Util {
         return wordToDigitMap;
     }
 
+
+        // given a string return the first word in the string (the input will include both numbers and letters). a words will not have numbers as digits in it
+        public static String getFirstWord(String input) {
+            // Split the input into words
+            String[] words = input.split("\\s+");
+
+            // Iterate over the words and check if any of them are digits
+            for (String word : words) {
+                if (!containsDigit(word)) {
+                    return word;
+                }
+            }
+
+            return null;
+        }
+
+        private static boolean containsDigit(String str) {
+            for (char c : str.toCharArray()) {
+                if (Character.isDigit(c)) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+
+        // return true if string is a number written as a word
+        public static boolean isNumberWrittenAsWord(String input) {
+            // read the word-to-digit.json file
+            String[] words = input.split(" ");
+
+            // Iterate over the words and check if any of them are digits
+            for (String word : words) {
+                if (wordToDigitMap.containsKey(word)) {
+                    return true;
+                }
+            }
+
+            return false;
+        }
     
 }
