@@ -30,46 +30,32 @@ public class Validator {
     private List<Clue> clues;
     private ArrayList<Integer[]> invalidCombinations;
     private boolean debug = true;
-
-   
-    
-
-
-    // store the debug messages 
     public ArrayList<String> debugMessages = new ArrayList<String>();
 
 
     // empty constructor
     public Validator() {
-
-        invalidCombinations = new ArrayList<Integer[]>();
-
-
-
+        invalidCombinations = new ArrayList<>();
     }
 
     // constructor
     public Validator(Integer[] code, List<Clue> clues) {
         this.code = code;
         this.clues = clues;
-
-        invalidCombinations = new ArrayList<Integer[]>();
+        this.invalidCombinations = new ArrayList<>();
     }
 
     public Validator(Integer[] code, List<Clue> clues, ArrayList<Integer[]> invalidCombinations){
         this.code = code;
         this.clues = clues;
         this.invalidCombinations = invalidCombinations;
-
-
-        }
+    }
 
     // builder pattern
     public Validator(Builder builder) {
         this.code = builder.code;
         this.clues = builder.clues;
         this.invalidCombinations = builder.invalidCombinations;
-
         this.debug = builder.debug;
     }
 
@@ -79,7 +65,7 @@ public class Validator {
     public static class Builder {
         private Integer[] code;
         private List<Clue> clues;
-        private ArrayList<Integer[]> invalidCombinations = new ArrayList<Integer[]>();
+        private ArrayList<Integer[]> invalidCombinations = new ArrayList<>();
         private boolean debug = false;
 
         public Builder code(Integer[] code) {
@@ -109,95 +95,68 @@ public class Validator {
 
     // check if the combination is valid with all the clues - this would include the placement of the numbers
     public boolean checkIfCombinationValid(Integer[] combination) {
-        for (Clue clue : clues) {
-            if (!checkIfComboValid(combination, clue)) {
-                return false;
-            }
-        }
-
-        return true;
+        return clues.stream().allMatch(clue -> checkIfComboValid(combination, clue));
     }
 
 
     // return true if the code found is valid with all clues
     public boolean isCodeValid(Integer[] codeFound) {
-        for (Clue clue : clues) {
-            if (!checkIfCombinationValid(codeFound)) {
-                return false;
-            }
-        }
-
-        return true;
+        return clues.stream().allMatch(clue -> checkIfCombinationValid(codeFound));
     }
 
 
      public boolean isCodeValid() {
-        for (Clue clue : clues) {
-            if (!checkIfCombinationValid(code)) {
-                return false;
-            }
-        }
-
-        return true;
+        return clues.stream().allMatch(clue -> checkIfCombinationValid(code));
     }
 
 
     // check if the combination is valid with all the clues - the placement of the numbers does not matter
-    public boolean checkIfCombinationSatisfiesAllClues(Integer[] combination, boolean sutifiesPartially)  { 
+    public boolean checkIfCombinationSatisfiesAllClues(Integer[] combination, boolean satisfiesPartially) {
+        for (Clue clue : clues) {
+            int numCorrectDigits = (int) Arrays.stream(combination)
+                    .filter(digit -> clue.getCombination().contains(digit))
+                    .count();
 
-        for (Clue clue : clues) {            
-
-            int numCorrectDigits = 0;
-            for (int i = 0; i < clue.getCombination().size(); i++) {
-                    // only check if the number is correct we dont care if it is well placed or not
-                    if (clue.getCombination().get(i) != null && Arrays.asList(combination).contains(clue.getCombination().get(i))) {
-                        numCorrectDigits++;
-                    }
+            if (numCorrectDigits != clue.getCorrectDigits() && !satisfiesPartially) {
+                handleInvalidCombination(combination, clue, numCorrectDigits);
+                return false;
             }
 
-            if (numCorrectDigits != clue.getCorrectDigits() && !sutifiesPartially) {
-                
-                // print just the combo, the combination of clue and the number of correct digits and how the clue needs to have
-                if(debug)
-                    System.out.println("combo: " + Arrays.toString(combination) + " clue: " + clue.getCombination().toString() + " numCorrectDigits: " + numCorrectDigits + " correctDigits: " + clue.getCorrectDigits());
-                                    
-                debugMessages.add("combo: " + Arrays.toString(combination) + " clue: " + clue.getCombination().toString() + " numCorrectDigits: " + numCorrectDigits + " correctDigits: " + clue.getCorrectDigits());
-
-                    return false;
-            } 
-
-            // even if partically satisfies the clue, if the code length - the length of the combination(which equals the numbers that have to be right and we just dont know which numbers from the clue are right but we know how many have to be right) is less than the number of correct digits then it is not a valid combination
             if (code.length - combination.length < clue.getCorrectDigits() - numCorrectDigits) {
-                // print the code length - the length of the combination(which equals the numbers that have to be right and we just dont know which numbers from the clue are right but we know how many have to be right) and the number of correct digits
-                if(debug)
-                    System.out.println("code length is " + code.length + " and the length of the combination is " + combination.length + " and the number of correct digits is " + clue.getCorrectDigits());
-                debugMessages.add("code length is " + code.length + " and the length of the combination is " + combination.length + " and the number of correct digits is " + clue.getCorrectDigits());
-                
-                    invalidCombinations.add(combination); 
-                
+                handleInvalidCombinationLength(combination, clue, numCorrectDigits);
                 return false;
-            } 
+            }
 
             if (numCorrectDigits > clue.getCorrectDigits()) {
                 return false;
             }
-            
-            
         }
-
         return true;
     }
 
-    
+    private void handleInvalidCombination(Integer[] combination, Clue clue, int numCorrectDigits) {
+        if (debug) {
+            String message = String.format("combo: %s clue: %s numCorrectDigits: %d correctDigits: %d",
+                    Arrays.toString(combination), clue.getCombination(), numCorrectDigits, clue.getCorrectDigits());
+            System.out.println(message);
+            debugMessages.add(message);
+        }
+        invalidCombinations.add(combination);
+    }
+
+    private void handleInvalidCombinationLength(Integer[] combination, Clue clue, int numCorrectDigits) {
+        if (debug) {
+            String message = String.format("code length is %d and the length of the combination is %d and the number of correct digits is %d",
+                    code.length, combination.length, clue.getCorrectDigits());
+            System.out.println(message);
+            debugMessages.add(message);
+        }
+        invalidCombinations.add(combination);
+    }    
 
 
         // check if the combination satisfies one clue - the placement of the digit does not matter
     public boolean checkIfCombinationSatisfiesClue(Integer[] combination, Clue clue) {
-
-
-
-
-
 
             int numCorrectDigits = 0;
             for (int i = 0; i < clue.getCombination().size(); i++) {
@@ -213,9 +172,7 @@ public class Validator {
                     invalidCombinations.add(combination);
                     return false;
                 }
-    
-               
-    
+
             }
     
              if (code.length - combination.length < clue.getCorrectDigits() - numCorrectDigits && code.length != combination.length) {
@@ -234,8 +191,6 @@ public class Validator {
                     
                     return false;
                 } 
-    
-            
     
             if (numCorrectDigits != clue.getCorrectDigits()) {
                 return false;

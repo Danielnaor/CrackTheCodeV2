@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
+import java.util.stream.IntStream;
 
 /**
  *
@@ -1189,9 +1190,7 @@ public class Solver {
                 if(debug)
                     System.out.println("updated the inCodeIndexUnknown list: " + inCodeIndexUnknown.toString());
             }
-        }
-                
-            
+        }        
         }
 
         // print the maxSatisfies and the maxSatisfiesIndex
@@ -1217,31 +1216,19 @@ public class Solver {
             System.out.println("the possible combinations: ");
             for (Integer[] combination : possibleCombinations) {
                 System.out.println(Arrays.toString(combination));
-            }
-        }   
-        }
-        
+                }
+            }   
+        }    
     }
 
     private void generateCombinationsOneClue(ArrayList<Integer[]> possibleCombinations, List<Integer> numbers, int numCorrectDigits) {
-        int[] indices = new int[numCorrectDigits];
+        int[] indices = IntStream.range(0, numCorrectDigits).toArray();
         int lastIndex = numCorrectDigits - 1;
-    
-        // Initialize indices
-        for (int i = 0; i < numCorrectDigits; i++) {
-            indices[i] = i;
-        }
-    
+
         while (indices[0] < numbers.size() - numCorrectDigits + 1) {
-            Integer[] combination = new Integer[numCorrectDigits];
-    
-            // Build the combination
-            for (int i = 0; i < numCorrectDigits; i++) {
-                combination[i] = numbers.get(indices[i]);
-            }
-    
+            Integer[] combination = Arrays.stream(indices).mapToObj(numbers::get).toArray(Integer[]::new);
             possibleCombinations.add(combination);
-    
+
             // Move to the next combination
             if (indices[lastIndex] < numbers.size() - 1) {
                 indices[lastIndex]++;
@@ -1250,7 +1237,7 @@ public class Solver {
                 while (j > 0 && indices[j] == numbers.size() - numCorrectDigits + j) {
                     j--;
                 }
-    
+
                 indices[j]++;
                 for (int k = j + 1; k < numCorrectDigits; k++) {
                     indices[k] = indices[k - 1] + 1;
@@ -1258,6 +1245,7 @@ public class Solver {
             }
         }
     }
+
 
         
     

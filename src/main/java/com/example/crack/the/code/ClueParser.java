@@ -4,19 +4,20 @@
  */
 package com.example.crack.the.code;
 
+//UNUSED IMPORTS 
 import java.io.File;
 import java.lang.reflect.Array;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.StringTokenizer;
 
 /**
  *
  * @author danie
  */
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Scanner;
-import java.util.StringTokenizer;
 import java.util.logging.*;
 
 public class ClueParser {
